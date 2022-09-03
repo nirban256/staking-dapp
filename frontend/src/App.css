@@ -6,7 +6,6 @@ body * {
 
 body {
     background-size: cover;
-
     background-image: linear-gradient(221deg, #000000 0%, #868686 50%, #ffffff 75%);
 }
 
@@ -382,36 +381,21 @@ textarea:focus {
     background-color: #1059FF
 }
 
-.btn-signin {
-
-    padding-top: 8px;
-    width: 100%;
-    height: 35px;
-    border: none;
-    border-radius: 20px;
-    margin-top: -8px;
-    text-decoration: none;
+.btn {
+    background-color: rgb(255, 0, 0);
 }
 
 .btn-animate {
     margin-left: auto;
-    margin-right: 32px;
     display: block;
     font-weight: 700;
     text-transform: uppercase;
-    font-size: 16px;
+    font-size: 20px;
     text-align: center;
     color: rgba(255, 255, 255, 1);
-    padding-top: 14px;
-    width: 85%;
-    height: 51px;
+    padding: 10px 30px 10px 30px;
     border: none;
     border-radius: 4px;
-    margin-top: 23px;
-    background-color: rgb(222 232 254);
-    left: 0px;
-    top: 0px;
-
 }
 
 .btn-animate-grow {
@@ -427,7 +411,6 @@ textarea:focus {
 a.btn-signup:hover,
 a.btn-signin:hover {
     cursor: pointer;
-
 }
 
 .forgot {

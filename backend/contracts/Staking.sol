@@ -58,7 +58,7 @@ contract Staking is Pausable, ReentrancyGuard {
     }
 
     // function for claiming rewards
-    function claimReward() external whenNotPaused returns (bool) {
+    function claimReward() external payable whenNotPaused returns (bool) {
         require(
             addressStaked[_msgSender()] == true,
             "You are not participated"
@@ -144,8 +144,8 @@ contract Staking is Pausable, ReentrancyGuard {
         totalTokens -= comissionAmount;
 
         stakeInfos[_msgSender()].claimed = totalTokens;
-        ptkToken.transfer(_msgSender(), totalTokens);
-        ptkToken.transfer(rewardAddress, comissionAmount);
+        payable(address(this)).transfer(totalTokens);
+        payable(rewardAddress).transfer(comissionAmount);
 
         emit Claimed(_msgSender(), totalTokens);
         addressStaked[_msgSender()] = false;

@@ -14,8 +14,8 @@ module.exports = {
     }
   },
   paths: {
-    artifacts: "../frontend/src/artifacts",
-    cache: "../frontend/src/cache"
+    artifacts: "../frontend/src/utils/artifacts",
+    cache: "../frontend/src/utils/cache"
   },
   etherscan: {
     apikey: {

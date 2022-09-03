@@ -1,16 +1,120 @@
+import React, { useEffect, useState } from "react";
 import './App.css';
 import logo3 from "./images/logo3.png";
 import ficon1 from "./images/ficon1.png";
 import ficon2 from "./images/ficon2.png";
 import ficon3 from "./images/ficon3.png";
+import stakingAbi from "./utils/artifacts/contracts/Staking.sol/Staking.json";
+import tokenAbi from "./utils/artifacts/contracts/Token.sol/Token.json";
+import { ethers } from "ethers";
 
 const App = () => {
+
+  const TokenContractAddress = "";
+  const StakingContractAddress = "";
+
+  const [currentAccount, setCurrentAccount] = useState(null);
+  const [stakeContract, setStakeContract] = useState(null);
+  const [tokenContract, setTokenContract] = useState(null);
+
+  const staking = async () => {
+    const approve = await tokenContract.approve()
+  }
+
+  useEffect(() => {
+    const { ethereum } = window;
+
+    if (ethereum) {
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      const tokensContract = new ethers.Contract(
+        TokenContractAddress,
+        tokenAbi.abi,
+        signer
+      );
+      setTokenContract(tokensContract);
+
+      const provider1 = new ethers.providers.Web3Provider(ethereum);
+      const signers = provider1.getSigner();
+      const stakingContract = new ethers.Contract(
+        StakingContractAddress,
+        stakingAbi.abi,
+        signers
+      );
+      setStakeContract(stakingContract);
+    } else {
+      console.log('Ethereum object not found');
+    }
+  }, []);
+
+  const connectWalletAction = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (!ethereum) {
+        alert('Get MetaMask!');
+        return;
+      }
+
+      const accounts = await ethereum.request({
+        method: 'eth_requestAccounts',
+      });
+
+      /*
+       * This should print out public address once we authorize Metamask.
+       */
+      console.log('Connected', accounts[0]);
+      setCurrentAccount(accounts[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+
+    const checkIfWalletIsConnected = async () => {
+      try {
+        const { ethereum } = window;
+
+        if (!ethereum) {
+          console.log('Make sure you have MetaMask!');
+          return;
+        } else {
+          console.log('We have the ethereum object', ethereum);
+
+          /*
+           * Check if we're authorized to access the user's wallet
+           */
+          const accounts = await ethereum.request({ method: 'eth_accounts' });
+
+          /*
+           * User can have multiple authorized accounts, we grab the first one if its there!
+           */
+          if (accounts.length !== 0) {
+            const account = accounts[0];
+            console.log('Found an authorized account:', account);
+            setCurrentAccount(account);
+          } else {
+            console.log('No authorized account found');
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    checkIfWalletIsConnected();
+
+  }, [])
+
   return (
     <div className="container">
       <div className="row">
-        <div className="col-md-12">
-          <div style={{ width: '200px', backgroundColor: '#cc3101' }} className="btn-animate"> <a href="#" rel="noreferrer" style={{ color: '#fff' }} className="btn-signin">Connect</a> </div>
-        </div>
+        <nav className="col-md-12">
+          <button type="submit" className="btn-animate btn" onClick={connectWalletAction}>
+            {currentAccount === null ? 'Connect' : `${currentAccount.slice(0, 4)}....${currentAccount.slice(38, 42)}`}
+          </button>
+        </nav>
       </div>
 
       <div className="row">
@@ -31,7 +135,7 @@ const App = () => {
             </div>
 
             <div className="col-md-6">
-              <h4 className="colwh2">0 BNB</h4>
+              <h4 className="colwh2">0 PTK</h4>
             </div>
 
             <div className="col-md-6">
@@ -39,7 +143,7 @@ const App = () => {
             </div>
 
             <div className="col-md-6">
-              <h4 className="colwh2">0 BNB</h4>
+              <h4 className="colwh2">0 PTK</h4>
             </div>
 
             <div className="col-md-6">
@@ -57,13 +161,13 @@ const App = () => {
             </div>
 
             <div className="col-md-5">
-              <h4 className="colwh3">BNB</h4>
+              <h4 className="colwh3">PTK</h4>
             </div>
           </div>
 
           <div className="row">
             <div className="col-md-12">
-              <div className="btn-animate"> <a href="#" rel="noreferrer" className="btn-signin">Bake Potatos</a> </div>
+              <div type="submit" className="btn-animate"> <a href="#" rel="noreferrer" className="btn-signin">Bake Potatos</a> </div>
             </div>
 
             <div className="col-md-12">
@@ -75,7 +179,7 @@ const App = () => {
             </div>
 
             <div className="col-md-6">
-              <h4 className="colwh2">0 BNB</h4>
+              <h4 className="colwh2">0 PTK</h4>
             </div>
           </div>
 
@@ -151,7 +255,7 @@ const App = () => {
 
           <div className="row" style={{ paddingLeft: '30px', paddingRight: '30px', paddingTop: '18px' }}>
             <div className="col-md-12">
-              <h6 className="colwh4">Earn 12% of the BNB used to bake beans from anyone who uses your referral link</h6>
+              <h6 className="colwh4">Earn 12% of the PTK used to bake beans from anyone who uses your referral link</h6>
             </div>
           </div>
         </div>
