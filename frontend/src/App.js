@@ -10,8 +10,8 @@ import { ethers } from "ethers";
 
 const App = () => {
 
-  const TokenContractAddress = "";
-  const StakingContractAddress = "";
+  const TokenContractAddress = "0x60f75Ef9cCEcE37907c2ea55f38AB109A9EcB18d";
+  const StakingContractAddress = "0xEa2A629E249730a4986E78A8D6512b706aFa5299";
 
   const [currentAccount, setCurrentAccount] = useState(null);
   const [stakeContract, setStakeContract] = useState(null);

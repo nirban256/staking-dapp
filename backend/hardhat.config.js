@@ -2,7 +2,7 @@ require("@nomicfoundation/hardhat-toolbox");
 require('@nomiclabs/hardhat-etherscan');
 require('dotenv').config();
 
-const { API_URL, PRIVATE_KEY_1, API_KEY } = process.env;
+const { API_URL, PRIVATE_KEY_1, PRIVATE_KEY_2, API_KEY } = process.env;
 
 module.exports = {
   solidity: "0.8.9",
@@ -10,7 +10,7 @@ module.exports = {
     hardhat: {},
     bscTestnet: {
       url: API_URL,
-      accounts: [PRIVATE_KEY_1]
+      accounts: [PRIVATE_KEY_1, PRIVATE_KEY_2]
     }
   },
   paths: {
@@ -25,4 +25,4 @@ module.exports = {
 };
 
 // Token contract address = 0x60f75Ef9cCEcE37907c2ea55f38AB109A9EcB18d
-// Staking contract address = 0xa8631959bfBCD9110e6B69fAcD0701c60b5D25A9
+// Staking contract address = 0xEa2A629E249730a4986E78A8D6512b706aFa5299
