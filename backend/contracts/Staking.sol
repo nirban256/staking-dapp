@@ -214,7 +214,7 @@ contract Staking is Pausable, ReentrancyGuard {
     }
 
     // function to withdraw tokens along with rewards
-    function withdrawTokens(uint256 _amount) external whenNonReentrant {
+    function withdrawTokens(uint256 _amount) external nonReentrant {
         require(
             _amount <= stakerBalances[msg.sender].amount,
             "You don't have sufficient funds"
