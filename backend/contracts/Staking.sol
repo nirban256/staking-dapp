@@ -45,7 +45,7 @@ contract Staking is Pausable, ReentrancyGuard {
     event Claimed(address indexed from, uint256 amount);
 
     constructor(
-        address _tokenContract,
+        Token _tokenContract,
         address _rewardAddress,
         address _admin
     ) {
@@ -63,16 +63,6 @@ contract Staking is Pausable, ReentrancyGuard {
     // function to get the total number of tokens staked in the contract
     function getTotalVolume() public view returns (uint256) {
         return totalSupply;
-    }
-
-    // function to get stakers address
-    function getStakersAddresses()
-        public
-        view
-        onlyOwner
-        returns (uint256[] memory)
-    {
-        return stakersAddresses;
     }
 
     // function to get information about the stakers
@@ -103,7 +93,7 @@ contract Staking is Pausable, ReentrancyGuard {
         uint256 flag = 0;
         for (uint256 i = 0; i < stakersAddresses.length; i++) {
             if (stakersAddresses[i] == msg.sender) {
-                stakerBalances[i].amount += _amount;
+                stakerBalances[msg.sender].amount += _amount;
                 flag++;
                 break;
             }
@@ -126,6 +116,7 @@ contract Staking is Pausable, ReentrancyGuard {
     // function to calculate interest of the tokens
     function calculateInterest(address _account, uint256 _amount)
         internal
+        view
         returns (uint256)
     {
         require(_account != address(0), "Owner cannot be the zero address");
@@ -133,76 +124,76 @@ contract Staking is Pausable, ReentrancyGuard {
         uint256 totalTokens = 0;
         uint256 comissionAmount = 0;
         if (
-            Stakers[_account].startTime + block.timestamp >=
-            Stakers[_account].startTime + 86400 &&
-            Stakers[_account].startTime + block.timestamp <
-            Stakers[_account].startTime + 172800
+            stakerBalances[_account].startTime + block.timestamp >=
+            stakerBalances[_account].startTime + 86400 &&
+            stakerBalances[_account].startTime + block.timestamp <
+            stakerBalances[_account].startTime + 172800
         ) {
             totalTokens = ((_amount * 2) / 100);
             comissionAmount = 100 * 10**9 wei;
         }
         // day 2
         else if (
-            Stakers[_account].startTime + block.timestamp >=
-            Stakers[_account].startTime + 172800 &&
-            Stakers[_account].startTime + block.timestamp <
-            Stakers[_account].startTime + 259200
+            stakerBalances[_account].startTime + block.timestamp >=
+            stakerBalances[_account].startTime + 172800 &&
+            stakerBalances[_account].startTime + block.timestamp <
+            stakerBalances[_account].startTime + 259200
         ) {
             totalTokens = ((_amount * 3) / 100);
             comissionAmount = 80 * 10**9 wei;
         }
         // day 3
         else if (
-            Stakers[_account].startTime + block.timestamp >=
-            Stakers[_account].startTime + 259200 &&
-            Stakers[_account].startTime + block.timestamp <
-            Stakers[_account].startTime + 345600
+            stakerBalances[_account].startTime + block.timestamp >=
+            stakerBalances[_account].startTime + 259200 &&
+            stakerBalances[_account].startTime + block.timestamp <
+            stakerBalances[_account].startTime + 345600
         ) {
             totalTokens = ((_amount * 4) / 100);
             comissionAmount = 70 * 10**9 wei;
         }
         // day 4
         else if (
-            Stakers[_account].startTime + block.timestamp >=
-            Stakers[_account].startTime + 345600 &&
-            Stakers[_account].startTime + block.timestamp <
-            Stakers[_account].startTime + 432000
+            stakerBalances[_account].startTime + block.timestamp >=
+            stakerBalances[_account].startTime + 345600 &&
+            stakerBalances[_account].startTime + block.timestamp <
+            stakerBalances[_account].startTime + 432000
         ) {
             totalTokens = ((_amount * 5) / 100);
             comissionAmount = 60 * 10**9 wei;
         }
         // day 5
         else if (
-            Stakers[_account].startTime + block.timestamp >=
-            Stakers[_account].startTime + 432000 &&
-            Stakers[_account].startTime + block.timestamp <
-            Stakers[_account].startTime + 518400
+            stakerBalances[_account].startTime + block.timestamp >=
+            stakerBalances[_account].startTime + 432000 &&
+            stakerBalances[_account].startTime + block.timestamp <
+            stakerBalances[_account].startTime + 518400
         ) {
             totalTokens = ((_amount * 6) / 100);
             comissionAmount = 50 * 10**9 wei;
         }
         // day 6
         else if (
-            Stakers[_account].startTime + block.timestamp >=
-            Stakers[_account].startTime + 518400 &&
-            Stakers[_account].startTime + block.timestamp <
-            Stakers[_account].startTime + 604800
+            stakerBalances[_account].startTime + block.timestamp >=
+            stakerBalances[_account].startTime + 518400 &&
+            stakerBalances[_account].startTime + block.timestamp <
+            stakerBalances[_account].startTime + 604800
         ) {
             totalTokens = ((_amount * 7) / 100);
             comissionAmount = 40 * 10**9 wei;
         }
         // day 7
         else if (
-            Stakers[_account].startTime + block.timestamp >=
-            Stakers[_account].startTime + 604800
+            stakerBalances[_account].startTime + block.timestamp >=
+            stakerBalances[_account].startTime + 604800
         ) {
             totalTokens = ((_amount * 8) / 100);
             comissionAmount = 30 * 10**9 wei;
         }
         // day 0
         else if (
-            Stakers[_account].startTime + block.timestamp <=
-            Stakers[_account].startTime + 86400
+            stakerBalances[_account].startTime + block.timestamp <=
+            stakerBalances[_account].startTime + 86400
         ) {
             totalTokens = _amount;
             comissionAmount = 25 * 10**9 wei;
