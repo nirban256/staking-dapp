@@ -18,7 +18,7 @@ contract Staking is Pausable, ReentrancyGuard {
     struct Stakers {
         uint256 amount;
         uint256 startTime;
-        uint256 claimed;
+        bool claimed;
     }
 
     struct User {
@@ -73,7 +73,7 @@ contract Staking is Pausable, ReentrancyGuard {
         returns (
             uint256,
             uint256,
-            uint256
+            bool
         )
     {
         return (
@@ -84,7 +84,7 @@ contract Staking is Pausable, ReentrancyGuard {
     }
 
     // function to stake tokens
-    function stakeTokens(uint256 _amount) external {
+    function stakeTokens(uint256 _amount) external payable whenNotPaused {
         require(_amount > 0, "Value must be greater than zero");
         require(token.balanceOf(msg.sender) >= _amount, "Insufficient Balance");
 
@@ -94,6 +94,8 @@ contract Staking is Pausable, ReentrancyGuard {
         for (uint256 i = 0; i < stakersAddresses.length; i++) {
             if (stakersAddresses[i] == msg.sender) {
                 stakerBalances[msg.sender].amount += _amount;
+                stakerBalances[msg.sender].startTime = block.timestamp;
+                stakerBalances[msg.sender].claimed = false;
                 flag++;
                 break;
             }
@@ -103,7 +105,7 @@ contract Staking is Pausable, ReentrancyGuard {
             stakerBalances[msg.sender] = Stakers({
                 amount: _amount,
                 startTime: block.timestamp,
-                claimed: 0
+                claimed: false
             });
             stakersAddresses.push(msg.sender);
         }
@@ -125,15 +127,15 @@ contract Staking is Pausable, ReentrancyGuard {
         uint256 comissionAmount = 0;
         if (
             stakerBalances[_account].startTime + block.timestamp >=
-            stakerBalances[_account].startTime + 86400 &&
+            stakerBalances[_account].startTime + 60 &&
             stakerBalances[_account].startTime + block.timestamp <
-            stakerBalances[_account].startTime + 172800
+            stakerBalances[_account].startTime + 120
         ) {
             totalTokens = ((_amount * 2) / 100);
             comissionAmount = 100 * 10**9 wei;
         }
         // day 2
-        else if (
+        /*else if (
             stakerBalances[_account].startTime + block.timestamp >=
             stakerBalances[_account].startTime + 172800 &&
             stakerBalances[_account].startTime + block.timestamp <
@@ -197,7 +199,7 @@ contract Staking is Pausable, ReentrancyGuard {
         ) {
             totalTokens = _amount;
             comissionAmount = 25 * 10**9 wei;
-        }
+        }*/
 
         totalTokens -= comissionAmount;
 
@@ -205,20 +207,26 @@ contract Staking is Pausable, ReentrancyGuard {
     }
 
     // function to withdraw tokens along with rewards
-    function withdrawTokens(uint256 _amount) external nonReentrant {
+    function withdrawTokens() external payable nonReentrant {
+        require(msg.sender != address(0), "Address cannot be zero address");
         require(
-            _amount <= stakerBalances[msg.sender].amount,
-            "You don't have sufficient funds"
+            stakerBalances[msg.sender].claimed == false,
+            "You have already claimed"
         );
 
-        uint256 interestAmount = calculateInterest(msg.sender, _amount);
-        stakerBalances[msg.sender].claimed = _amount + interestAmount;
-        stakerBalances[msg.sender].amount -= _amount;
-        totalSupply -= _amount;
+        uint256 interestAmount = calculateInterest(
+            msg.sender,
+            stakerBalances[msg.sender].amount
+        );
+        stakerBalances[msg.sender].claimed = true;
+        totalSupply -= stakerBalances[msg.sender].amount;
 
-        token.transferFrom(address(this), msg.sender, _amount + interestAmount);
+        token.transfer(
+            msg.sender,
+            stakerBalances[msg.sender].amount + interestAmount
+        );
 
-        emit Claimed(address(this), _amount);
+        emit Claimed(address(this), stakerBalances[msg.sender].amount);
     }
 
     // function to get referral rewards
