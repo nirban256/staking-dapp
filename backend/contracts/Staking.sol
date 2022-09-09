@@ -37,7 +37,7 @@ contract Staking is Pausable, ReentrancyGuard {
 
     // mappings for generating referral rewards
     mapping(address => User) public user_info;
-    mapping(address => Stakers) private stakerBalances;
+    mapping(address => Stakers) public stakerBalances;
 
     address[] private stakersAddresses;
 
@@ -93,9 +93,9 @@ contract Staking is Pausable, ReentrancyGuard {
         uint256 flag = 0;
         for (uint256 i = 0; i < stakersAddresses.length; i++) {
             if (stakersAddresses[i] == msg.sender) {
-                stakerBalances[msg.sender].amount += _amount;
-                stakerBalances[msg.sender].startTime = block.timestamp;
-                stakerBalances[msg.sender].claimed = false;
+                stakerBalances[stakersAddresses[i]].amount += _amount;
+                stakerBalances[stakersAddresses[i]].startTime = block.timestamp;
+                stakerBalances[stakersAddresses[i]].claimed = false;
                 flag++;
                 break;
             }
@@ -119,7 +119,7 @@ contract Staking is Pausable, ReentrancyGuard {
     function calculateInterest(address _account, uint256 _amount)
         internal
         view
-        returns (uint256)
+        returns (uint256, uint256)
     {
         require(_account != address(0), "Owner cannot be the zero address");
 
@@ -131,7 +131,7 @@ contract Staking is Pausable, ReentrancyGuard {
             stakerBalances[_account].startTime + block.timestamp <
             stakerBalances[_account].startTime + 120
         ) {
-            totalTokens = ((_amount * 2) / 100);
+            totalTokens = ((_amount * (2 * 10**18)) / 100);
             comissionAmount = 100 * 10**9 wei;
         }
         // day 2
@@ -203,7 +203,7 @@ contract Staking is Pausable, ReentrancyGuard {
 
         totalTokens -= comissionAmount;
 
-        return totalTokens;
+        return (totalTokens, comissionAmount);
     }
 
     // function to withdraw tokens along with rewards
@@ -214,7 +214,9 @@ contract Staking is Pausable, ReentrancyGuard {
             "You have already claimed"
         );
 
-        uint256 interestAmount = calculateInterest(
+        uint256 interestAmount = 0;
+        uint256 comissionAmount = 0;
+        (interestAmount, comissionAmount) = calculateInterest(
             msg.sender,
             stakerBalances[msg.sender].amount
         );
@@ -225,6 +227,9 @@ contract Staking is Pausable, ReentrancyGuard {
             msg.sender,
             stakerBalances[msg.sender].amount + interestAmount
         );
+        stakerBalances[msg.sender].amount -= stakerBalances[msg.sender].amount;
+
+        token.transfer(rewardAddress, comissionAmount);
 
         emit Claimed(address(this), stakerBalances[msg.sender].amount);
     }
