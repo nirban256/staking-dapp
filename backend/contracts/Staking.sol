@@ -1,273 +1,133 @@
-// SPDX-License-Identifier: Unlicensed
-pragma solidity ^0.8.9;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "./Token.sol";
-
-contract Staking is Pausable, ReentrancyGuard {
-    Token token;
-
-    using SafeMath for uint256;
-
+contract Staking {
     address public admin;
-    address private rewardAddress;
-    uint256 private totalSupply;
 
     struct Stakers {
-        uint256 amount;
-        uint256 startTime;
-        bool claimed;
+        uint256 stakerId;
+        address stakerAddress;
+        uint256 dateCreated;
+        uint256 dateUnlocked;
+        uint256 interestPercentage;
+        uint256 amountStaked;
+        uint256 interest;
+        bool open;
     }
+    Stakers staker;
 
-    struct User {
-        bool referred;
-        address referred_by;
-    }
+    uint256 public totalStakers;
 
-    struct Referal_levels {
-        uint256 level_1;
-        uint256 level_2;
-        uint256 level_3;
-        uint256 level_4;
-    }
+    mapping(uint256 => Stakers) public stakers;
+    mapping(address => uint256[]) public stakerIdsByAddress;
+    mapping(uint256 => uint256) public levels;
 
-    mapping(address => Referal_levels) public refer_info;
+    uint256[] public lockPeriods;
 
-    // mappings for generating referral rewards
-    mapping(address => User) public user_info;
-    mapping(address => Stakers) public stakerBalances;
+    constructor() payable {
+        admin = msg.sender;
+        totalStakers = 0;
 
-    address[] private stakersAddresses;
+        levels[30] = 600;
+        levels[90] = 1000;
+        levels[180] = 1400;
 
-    event Staked(address indexed from, uint256 amount);
-    event Claimed(address indexed from, uint256 amount);
-
-    constructor(
-        Token _tokenContract,
-        address _rewardAddress,
-        address _admin
-    ) {
-        token = _tokenContract;
-        admin = _admin;
-        rewardAddress = _rewardAddress;
-        totalSupply = 0;
+        lockPeriods.push(30);
+        lockPeriods.push(90);
+        lockPeriods.push(180);
     }
 
     modifier onlyOwner() {
-        require(msg.sender == admin, "You don't have the required permission");
+        require(admin == msg.sender, "Only owner can change it");
         _;
     }
 
-    // function to get the total number of tokens staked in the contract
-    function getTotalVolume() public view returns (uint256) {
-        return totalSupply;
-    }
-
-    // function to get information about the stakers
-    function getStakersBalances(address _account)
-        public
-        view
-        onlyOwner
-        returns (
-            uint256,
-            uint256,
-            bool
-        )
-    {
-        return (
-            stakerBalances[_account].amount,
-            stakerBalances[_account].startTime,
-            stakerBalances[_account].claimed
-        );
-    }
-
-    // function to stake tokens
-    function stakeTokens(uint256 _amount) external payable whenNotPaused {
-        require(_amount > 0, "Value must be greater than zero");
-        require(token.balanceOf(msg.sender) >= _amount, "Insufficient Balance");
-
-        token.transferFrom(msg.sender, address(this), _amount);
-
-        uint256 flag = 0;
-        for (uint256 i = 0; i < stakersAddresses.length; i++) {
-            if (stakersAddresses[i] == msg.sender) {
-                stakerBalances[stakersAddresses[i]].amount += _amount;
-                stakerBalances[stakersAddresses[i]].startTime = block.timestamp;
-                stakerBalances[stakersAddresses[i]].claimed = false;
-                flag++;
-                break;
-            }
-        } // Error: staking again without claiming will get to receive the caller of the contract more interest on the tokens inspite being staked later due to startTime property.
-
-        if (flag == 0) {
-            stakerBalances[msg.sender] = Stakers({
-                amount: _amount,
-                startTime: block.timestamp,
-                claimed: false
-            });
-            stakersAddresses.push(msg.sender);
-        }
-
-        totalSupply += _amount;
-
-        emit Staked(msg.sender, _amount);
-    }
-
-    // function to calculate interest of the tokens
-    function calculateInterest(address _account, uint256 _amount)
-        internal
-        view
-        returns (uint256, uint256)
-    {
-        require(_account != address(0), "Owner cannot be the zero address");
-
-        uint256 totalTokens = 0;
-        uint256 comissionAmount = 0;
-        if (
-            stakerBalances[_account].startTime + block.timestamp >=
-            stakerBalances[_account].startTime + 60 &&
-            stakerBalances[_account].startTime + block.timestamp <
-            stakerBalances[_account].startTime + 120
-        ) {
-            totalTokens = ((_amount * (2 * 10**18)) / 100);
-            comissionAmount = 100 * 10**9 wei;
-        }
-        // day 2
-        /*else if (
-            stakerBalances[_account].startTime + block.timestamp >=
-            stakerBalances[_account].startTime + 172800 &&
-            stakerBalances[_account].startTime + block.timestamp <
-            stakerBalances[_account].startTime + 259200
-        ) {
-            totalTokens = ((_amount * 3) / 100);
-            comissionAmount = 80 * 10**9 wei;
-        }
-        // day 3
-        else if (
-            stakerBalances[_account].startTime + block.timestamp >=
-            stakerBalances[_account].startTime + 259200 &&
-            stakerBalances[_account].startTime + block.timestamp <
-            stakerBalances[_account].startTime + 345600
-        ) {
-            totalTokens = ((_amount * 4) / 100);
-            comissionAmount = 70 * 10**9 wei;
-        }
-        // day 4
-        else if (
-            stakerBalances[_account].startTime + block.timestamp >=
-            stakerBalances[_account].startTime + 345600 &&
-            stakerBalances[_account].startTime + block.timestamp <
-            stakerBalances[_account].startTime + 432000
-        ) {
-            totalTokens = ((_amount * 5) / 100);
-            comissionAmount = 60 * 10**9 wei;
-        }
-        // day 5
-        else if (
-            stakerBalances[_account].startTime + block.timestamp >=
-            stakerBalances[_account].startTime + 432000 &&
-            stakerBalances[_account].startTime + block.timestamp <
-            stakerBalances[_account].startTime + 518400
-        ) {
-            totalTokens = ((_amount * 6) / 100);
-            comissionAmount = 50 * 10**9 wei;
-        }
-        // day 6
-        else if (
-            stakerBalances[_account].startTime + block.timestamp >=
-            stakerBalances[_account].startTime + 518400 &&
-            stakerBalances[_account].startTime + block.timestamp <
-            stakerBalances[_account].startTime + 604800
-        ) {
-            totalTokens = ((_amount * 7) / 100);
-            comissionAmount = 40 * 10**9 wei;
-        }
-        // day 7
-        else if (
-            stakerBalances[_account].startTime + block.timestamp >=
-            stakerBalances[_account].startTime + 604800
-        ) {
-            totalTokens = ((_amount * 8) / 100);
-            comissionAmount = 30 * 10**9 wei;
-        }
-        // day 0
-        else if (
-            stakerBalances[_account].startTime + block.timestamp <=
-            stakerBalances[_account].startTime + 86400
-        ) {
-            totalTokens = _amount;
-            comissionAmount = 25 * 10**9 wei;
-        }*/
-
-        totalTokens -= comissionAmount;
-
-        return (totalTokens, comissionAmount);
-    }
-
-    // function to withdraw tokens along with rewards
-    function withdrawTokens() external payable nonReentrant {
-        require(msg.sender != address(0), "Address cannot be zero address");
+    function stakeMatic(uint256 _numOfDays) external payable {
         require(
-            stakerBalances[msg.sender].claimed == false,
-            "You have already claimed"
+            levels[_numOfDays] > 0,
+            "You need to stake for a longer period of time"
         );
 
-        uint256 interestAmount = 0;
-        uint256 comissionAmount = 0;
-        (interestAmount, comissionAmount) = calculateInterest(
+        stakers[totalStakers] = Stakers(
+            totalStakers,
             msg.sender,
-            stakerBalances[msg.sender].amount
+            block.timestamp,
+            block.timestamp + (_numOfDays * 1 days),
+            levels[_numOfDays],
+            msg.value,
+            calculateInterest(levels[_numOfDays], _numOfDays, msg.value),
+            true
         );
-        stakerBalances[msg.sender].claimed = true;
-        totalSupply -= stakerBalances[msg.sender].amount;
 
-        token.transfer(
-            msg.sender,
-            stakerBalances[msg.sender].amount + interestAmount
+        stakerIdsByAddress[msg.sender].push(totalStakers);
+        totalStakers++;
+    }
+
+    function calculateInterest(
+        uint256 _interest,
+        uint256 _numOfDays,
+        uint256 _amount
+    ) private pure returns (uint256) {
+        return (_interest * _amount) / 10000;
+    }
+
+    function getInterestRate(uint256 _numOfDays)
+        external
+        view
+        returns (uint256)
+    {
+        return levels[_numOfDays];
+    }
+
+    function updateLockPeriod(uint256 _numOfDays, uint256 _interest)
+        external
+        onlyOwner
+    {
+        levels[_numOfDays] = _interest;
+        lockPeriods.push(_numOfDays);
+    }
+
+    function getStakersById(uint256 _stakerId)
+        external
+        view
+        returns (Stakers memory)
+    {
+        return stakers[_stakerId];
+    }
+
+    function getLockperiods() external view returns (uint256[] memory) {
+        return lockPeriods;
+    }
+
+    function getStakerIdsByAddresses(address _address)
+        external
+        view
+        returns (uint256[] memory)
+    {
+        return stakerIdsByAddress[_address];
+    }
+
+    function changeUnlockPeriod(uint256 _id, uint256 _newUnlockPeriod)
+        external
+        onlyOwner
+    {
+        stakers[_id].dateUnlocked = _newUnlockPeriod;
+    }
+
+    function withdrawMatic(uint256 _id) external {
+        require(
+            stakers[_id].stakerAddress == msg.sender,
+            "You are not the staker"
         );
-        stakerBalances[msg.sender].amount -= stakerBalances[msg.sender].amount;
+        require(stakers[_id].open == true, "Matic already withdrawn");
 
-        token.transfer(rewardAddress, comissionAmount);
+        stakers[_id].open = false;
 
-        emit Claimed(address(this), stakerBalances[msg.sender].amount);
-    }
-
-    // function to get referral rewards
-    function referee(address ref_add) public {
-        require(user_info[msg.sender].referred == false, " Already referred ");
-        require(ref_add != msg.sender, " You cannot refer yourself ");
-
-        user_info[msg.sender].referred_by = ref_add;
-        user_info[msg.sender].referred = true;
-
-        address level1 = user_info[msg.sender].referred_by;
-        address level2 = user_info[level1].referred_by;
-        address level3 = user_info[level2].referred_by;
-        address level4 = user_info[level3].referred_by;
-
-        if ((level1 != msg.sender) && (level1 != address(0))) {
-            refer_info[level1].level_1 += 1;
+        if (block.timestamp > stakers[_id].dateUnlocked) {
+            uint256 amount = stakers[_id].amountStaked + stakers[_id].interest;
+            payable(msg.sender).call{value: amount}("");
+        } else {
+            payable(msg.sender).call{value: stakers[_id].amountStaked}("");
         }
-        if ((level2 != msg.sender) && (level2 != address(0))) {
-            refer_info[level2].level_2 += 1;
-        }
-        if ((level3 != msg.sender) && (level3 != address(0))) {
-            refer_info[level3].level_3 += 1;
-        }
-        if ((level4 != msg.sender) && (level4 != address(0))) {
-            refer_info[level4].level_4 += 1;
-        }
-    }
-
-    // function to pause the contract in case of hacks
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    // function to unpause the contract after any issue which occurs gets resolved
-    function unpause() external onlyOwner {
-        _unpause();
     }
 }
