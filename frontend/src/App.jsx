@@ -4,10 +4,11 @@ import { ethers } from "ethers";
 import './App.css';
 import Navbar from "./components/Navbar";
 import StakeModal from "./components/StakeModal";
-import maticLogo from "./images/polygon-matic-logo.svg";
+import bnbLogo from "./images/binance-coin-logo.svg";
 import { Coin } from "react-bootstrap-icons";
 
-const ContractAddress = '0x12163B070B97f06F5061D93164D960bbFCfdf965';
+// const ContractAddress = '0x12163B070B97f06F5061D93164D960bbFCfdf965';
+const ContractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 function App() {
 
@@ -23,9 +24,10 @@ function App() {
 
   // staking
   const [stakeModal, setStakeModal] = useState(false);
-  const [stakingLength, setStakingLength] = useState(undefined);
-  const [stakingPercent, setStakingPercent] = useState(undefined);
+  // const [stakingLength, setStakingLength] = useState(undefined);
+  // const [stakingPercent, setStakingPercent] = useState('');
   const [amount, setAmount] = useState(0);
+  const [referralId, setReferralId] = useState('');
 
   // functions
   const toWei = ether => ethers.utils.parseEther(ether);
@@ -62,9 +64,6 @@ function App() {
     loopedAssets.map(async asset => {
       const parsedAsset = {
         stakersId: asset.stakerId,
-        percentInterest: Number(asset.interestPercentage) / 100,
-        daysRemaining: daysRemaining(Number(asset.dateUnlocked)),
-        maticInterest: toMatic(asset.interest),
         maticStaked: toMatic(asset.amountStaked),
         open: asset.open
       }
@@ -93,25 +92,28 @@ function App() {
     getAssets(assetIds, account);
   }
 
-  const stakeMatic = () => {
+  const stakeMatic = (amount) => {
     const wei = toWei(amount);
     const data = { value: wei };
 
-    contract.connect(account).stakeMatic(stakingLength, data)
+    contract.connect(account).stakeMatic(data)
   }
 
-  const stakingModal = (stakingLength, stakingPercent) => {
+  const stakingModal = (stakingLength) => {
     setStakeModal(true);
-    setStakingLength(stakingLength);
-    setStakingPercent(stakingPercent);
   }
 
-  const daysRemaining = (unlockDate) => {
-    const currentTime = Date.now() / 1000;
-    const remainingTime = unlockDate - currentTime;
-
-    return Math.max((remainingTime / 60 / 60 / 24).toFixed(0), 0);
+  const referral = (e) => {
+    e.preventDefault();
+    contract.connect(account).referre(referralId);
   }
+
+  // const daysRemaining = (unlockDate) => {
+  //   const currentTime = Date.now() / 1000;
+  //   const remainingTime = unlockDate - currentTime;
+
+  //   return Math.max((remainingTime / 60 / 60 / 24).toFixed(0), 0);
+  // }
 
   const withdraw = (stakersId) => {
     contract.connect(account).withdrawMatic(stakersId);
@@ -127,14 +129,14 @@ function App() {
         <div className="marketContainer">
           <div className="subContainer">
             <span>
-              <img src={maticLogo} alt="matic logo" className="logoImg" />
+              <img src={bnbLogo} alt="matic logo" className="logoImg" />
             </span>
-            <span className="marketHeader">Matic Market</span>
+            <span className="marketHeader">BNB Market</span>
           </div>
 
           <div className="row">
             <div className="col-md-4">
-              <div onClick={() => stakingModal(30, '7%')} className="marketOption">
+              <div onClick={() => stakingModal(2, '3%')} className="marketOption">
                 <div className="glyphContainer hoverButton">
                   <span className="glyph">
                     <Coin />
@@ -142,14 +144,29 @@ function App() {
                 </div>
 
                 <div className="optionData">
-                  <span>1 Month</span>
+                  <span>2 Days</span>
+                  <span className="optionPercent">3%</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-md-4">
+              <div onClick={() => stakingModal(4, '6%')} className="marketOption">
+                <div className="glyphContainer hoverButton">
+                  <span className="glyph">
+                    <Coin />
+                  </span>
+                </div>
+
+                <div className="optionData">
+                  <span>4 Days</span>
                   <span className="optionPercent">6%</span>
                 </div>
               </div>
             </div>
 
             <div className="col-md-4">
-              <div onClick={() => stakingModal(30, '10%')} className="marketOption">
+              <div onClick={() => stakingModal(7, '10%')} className="marketOption">
                 <div className="glyphContainer hoverButton">
                   <span className="glyph">
                     <Coin />
@@ -157,23 +174,8 @@ function App() {
                 </div>
 
                 <div className="optionData">
-                  <span>3 Months</span>
+                  <span>7 Days</span>
                   <span className="optionPercent">10%</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-4">
-              <div onClick={() => stakingModal(180, '14%')} className="marketOption">
-                <div className="glyphContainer hoverButton">
-                  <span className="glyph">
-                    <Coin />
-                  </span>
-                </div>
-
-                <div className="optionData">
-                  <span>6 Months</span>
-                  <span className="optionPercent">14%</span>
                 </div>
               </div>
             </div>
@@ -190,10 +192,7 @@ function App() {
         <div>
           <div className="row columnHeaders">
             <div className="col-md-2">Assets</div>
-            <div className="col-md-2">Percent Interest</div>
             <div className="col-md-2">Staked</div>
-            <div className="col-md-2">Interest</div>
-            <div className="col-md-2">Days Remaining</div>
             <div className="col-md-2"></div>
           </div>
         </div>
@@ -203,22 +202,19 @@ function App() {
           <div className="row">
             <div className="col-md-2">
               <span>
-                <img src={maticLogo} alt="matic-logo" className="stakedLogoImg" />
+                <img src={bnbLogo} alt="matic-logo" className="stakedLogoImg" />
               </span>
             </div>
 
-            <div className="col-md-2">
+            {/* <div className="col-md-2">
               {asset.percentInterest} %
-            </div>
+            </div> */}
             <div className="col-md-2">
               {asset.maticStaked}
             </div>
-            <div className="col-md-2">
+            {/* <div className="col-md-2">
               {asset.maticInterest}
-            </div>
-            <div className="col-md-2">
-              {asset.daysRemaining}
-            </div>
+            </div> */}
             <div className="col-md-2">
               {asset.open ? (
                 <div className="orangeMiniButton" onClick={() => withdraw(asset.stakersId)}>
@@ -233,8 +229,21 @@ function App() {
 
       </div>
 
+      <div className="referral_container">
+        <h2 className="referral_heading">Insert your referral link</h2>
+
+        <form className="referral_input">
+          <input type="text" placeholder="Enter your referral id" onChange={e => setReferralId(e.target.value)} />
+          <button className="referralButton" onSubmit={referral}></button>
+        </form>
+
+        <h3 className="referral_heading">
+          {(accountAddress) ? `Your referral id - ${accountAddress}` : ''}
+        </h3>
+      </div>
+
       {stakeModal && (
-        <StakeModal onClose={() => setStakeModal(false)} stakingLength={stakingLength} stakingPercent={stakingPercent} amount={amount} setAmount={setAmount} stakeMatic={stakeMatic} />
+        <StakeModal onClose={() => setStakeModal(false)} amount={amount} setAmount={setAmount} stakeMatic={stakeMatic} />
       )}
 
     </div>

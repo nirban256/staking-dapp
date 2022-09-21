@@ -17,13 +17,13 @@ describe('Staking', () => {
     })
 
     it('should set levels and lock periods', async () => {
-      expect(await staking.lockPeriods(0)).to.equal(30);
-      expect(await staking.lockPeriods(1)).to.equal(90);
-      expect(await staking.lockPeriods(2)).to.equal(180);
+      expect(await staking.lockPeriods(0)).to.equal(1);
+      expect(await staking.lockPeriods(1)).to.equal(2);
+      expect(await staking.lockPeriods(2)).to.equal(3);
 
-      expect(await staking.levels(30)).to.equal(600);
-      expect(await staking.levels(90)).to.equal(1000);
-      expect(await staking.levels(180)).to.equal(1400);
+      expect(await staking.levels(1)).to.equal(200);
+      expect(await staking.levels(2)).to.equal(300);
+      expect(await staking.levels(3)).to.equal(400);
     })
 
     it('should check contract balance after deployment', async () => {
@@ -44,7 +44,7 @@ describe('Staking', () => {
       signerBalance = await signer1.getBalance()
       const data = { value: amount };
 
-      const transaction = await staking.connect(signer1).stakeMatic(30, data);
+      const transaction = await staking.connect(signer1).stakeMatic(1, data);
       const recepient = await transaction.wait();
       const gasUsed = recepient.gasUsed.mul(recepient.effectiveGasPrice);
 

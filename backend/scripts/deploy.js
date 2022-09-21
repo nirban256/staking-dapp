@@ -7,43 +7,41 @@ async function main() {
 
   const Staking = await ethers.getContractFactory('Staking', signer1);
 
-  const staking = await Staking.deploy({
-    value: ethers.utils.parseEther('0.4')
-  })
+  const staking = await Staking.deploy('0x5FbDB2315678afecb367f032d93F642f64180aa3');
 
   await staking.deployed();
 
   console.log(`Staking contract deployed to ${staking.address}`);
 
-  const provider = waffle.provider;
+  /* const provider = waffle.provider;
   let data;
   let transaction;
   let receipt;
   let block;
   let newUnlockDate;
 
-  data = { value: ethers.utils.parseEther('0.01') }
-  transaction = await staking.connect(signer2).stakeMatic(30, data);
+  data = { value: ethers.utils.parseEther('10') }
+  transaction = await staking.connect(signer2).stakePotato(1, data);
 
-  data = { value: ethers.utils.parseEther('0.15') }
-  transaction = await staking.connect(signer2).stakeMatic(180, data);
+  data = { value: ethers.utils.parseEther('15') }
+  transaction = await staking.connect(signer2).stakePotato(2, data);
 
-  data = { value: ethers.utils.parseEther('0.1') }
-  transaction = await staking.connect(signer2).stakeMatic(180, data);
+  data = { value: ethers.utils.parseEther('12') }
+  transaction = await staking.connect(signer2).stakePotato(2, data);
 
-  data = { value: ethers.utils.parseEther('0.3') }
-  transaction = await staking.connect(signer2).stakeMatic(90, data);
+  data = { value: ethers.utils.parseEther('30') }
+  transaction = await staking.connect(signer2).stakePotato(4, data);
   receipt = await transaction.wait();
   block = await provider.getBlock(receipt.blockNumber);
   newUnlockDate = block.timestamp - (60 * 60 * 24 * 1000);
   await staking.connect(signer1).changeUnlockPeriod(3, newUnlockDate);
 
-  data = { value: ethers.utils.parseEther('0.12') }
-  transaction = await staking.connect(signer2).stakeMatic(180, data);
+  data = { value: ethers.utils.parseEther('12') }
+  transaction = await staking.connect(signer2).stakePotato(7, data);
   receipt = await transaction.wait();
   block = await provider.getBlock(receipt.blockNumber);
   newUnlockDate = block.timestamp - (60 * 60 * 24 * 1000);
-  await staking.connect(signer1).changeUnlockPeriod(4, newUnlockDate);
+  await staking.connect(signer1).changeUnlockPeriod(4, newUnlockDate); */
 
 }
 
@@ -56,3 +54,4 @@ main().catch((error) => {
 
 
 // Contract Address = 0x12163B070B97f06F5061D93164D960bbFCfdf965
+// Bsc Testnet Address = 0xe39FBeE12491245b9ffEa2631Ee85a5f768fE385

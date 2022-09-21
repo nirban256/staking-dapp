@@ -223,3 +223,35 @@
 .stakingTerms {
   color: blue;
 }
+
+/* Referral container */
+.referral_container {
+  backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, #101040, hsla(0, 0%, 100%, 0));
+  border: 1px solid hsla(0, 0%, 100%, .18);
+  box-shadow: 0 8px 32px 0 rgb(0 0 0 / 37%);
+  width: 70vw;
+  height: 170px;
+  margin: 0 auto;
+  margin-top: 50px;
+  top: 50%;
+  border-radius: 24px;
+  padding: 8px;
+}
+
+.referral_heading {
+  color: #fff;
+  font-size: 30px;
+  font-weight: 500;
+  padding-top: 1rem;
+}
+
+.referralButton {
+  margin-right: 24px;
+  background-color: #1168f1;
+  border-radius: 4px;
+  padding: 15px 15px;
+  color: #f1f1f3;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
