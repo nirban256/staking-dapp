@@ -1,10 +1,36 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/security/Pausable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/security/ReentrancyGuard.sol";
 
-import "./Token.sol";
+// interface Token {
+//     function transferFrom(
+//         address _from,
+//         address _to,
+//         uint256 _value
+//     ) public whenNotPaused returns (bool) {}
+
+//     function balanceOf(address _owner) public view returns (uint256 balance) {}
+
+//     function transfer(address _to, uint256 _value)
+//         public
+//         whenNotPaused
+//         returns (bool)
+//     {}
+// }
+
+interface Token {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool);
+
+    function balanceOf(address account) external view returns (uint256);
+
+    function transfer(address to, uint256 amount) external returns (bool);
+}
 
 contract Staking is Pausable, ReentrancyGuard {
     Token token;
@@ -66,6 +92,14 @@ contract Staking is Pausable, ReentrancyGuard {
         require(_amount >= 0, "Value must be greater than 0");
 
         token.transferFrom(msg.sender, address(this), _amount);
+        // bool success = token.call(
+        //     abi.encodeWithSignature(
+        //         "transferFrom(address,address,uint256)",
+        //         msg.sender,
+        //         address(this),
+        //         _amount
+        //     )
+        // );
 
         stakers[totalStakers] = Stakers(
             totalStakers,
@@ -89,9 +123,8 @@ contract Staking is Pausable, ReentrancyGuard {
         returns (uint256)
     {
         uint256 totalTimeStaked = (block.timestamp - stakers[_id].dateCreated) /
-            60 /
-            60 /
-            24;
+            60 minutes /
+            24 hours;
         uint256 interest = 0;
 
         for (uint256 i = 0; i <= lockPeriods.length - 1; i++) {
@@ -102,7 +135,7 @@ contract Staking is Pausable, ReentrancyGuard {
                 totalTimeStaked >= lockPeriods[i] &&
                 totalTimeStaked < lockPeriods[i + 1]
             ) {
-                interest = levels[i];
+                interest = levels[lockPeriods[i]];
             }
         }
 
@@ -112,9 +145,8 @@ contract Staking is Pausable, ReentrancyGuard {
     function getInterestRate(uint256 _id) external view returns (uint256) {
         uint256 ans = 0;
         uint256 totalTimeStaked = (block.timestamp - stakers[_id].dateCreated) /
-            60 /
-            60 /
-            24;
+            60 minutes /
+            24 hours;
         for (uint256 i = 0; i < lockPeriods.length - 1; i++) {
             if (
                 i == lockPeriods.length - 1 && totalTimeStaked > lockPeriods[i]
@@ -171,17 +203,21 @@ contract Staking is Pausable, ReentrancyGuard {
         );
         require(stakers[_id].open == true, "Potato already withdrawn");
 
-        uint256 commissionAmount = 100 wei;
+        unchecked {
+            uint256 commissionAmount = 100 wei;
 
-        uint256 interest = calculateInterest(_id, stakers[_id].amountStaked);
-        stakers[_id].open = false;
+            uint256 interest = calculateInterest(
+                _id,
+                stakers[_id].amountStaked
+            );
+            stakers[_id].open = false;
 
-        interest -= commissionAmount;
+            stakers[_id].amountStaked -= commissionAmount;
+            token.transfer(msg.sender, stakers[_id].amountStaked + interest);
+            token.transfer(admin, commissionAmount);
+        }
 
-        token.transfer(msg.sender, stakers[_id].amountStaked + interest);
-        token.transfer(admin, commissionAmount);
-
-        //payable(msg.sender).transfer(stakers[_id].amountStaked + interest);
+        // payable(msg.sender).transfer(stakers[_id].amountStaked + interest);
     }
 
     function referral(address ref_add) public {

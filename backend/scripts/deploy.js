@@ -3,11 +3,11 @@ require("dotenv").config();
 
 async function main() {
 
-  [signer1, signer2] = await ethers.getSigners();
+  // [signer1, signer2] = await ethers.getSigners();
 
-  const Staking = await ethers.getContractFactory('Staking', signer1);
+  const Staking = await ethers.getContractFactory('Staking');
 
-  const staking = await Staking.deploy('0x5FbDB2315678afecb367f032d93F642f64180aa3');
+  const staking = await Staking.deploy('0x9767Ba8eCE4fAD70545a1C0544921070D9746271');
 
   await staking.deployed();
 
@@ -54,4 +54,4 @@ main().catch((error) => {
 
 
 // Contract Address = 0x12163B070B97f06F5061D93164D960bbFCfdf965
-// Bsc Testnet Address = 0xe39FBeE12491245b9ffEa2631Ee85a5f768fE385
+// Bsc Testnet Address = 0x4c111e7Fb90D814e3Ba29b8B24fdE4e0c5C89f21
