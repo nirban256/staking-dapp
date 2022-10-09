@@ -1,12 +1,12 @@
 import React from 'react'
 
-const StakeModal = ({ onClose, amount, setAmount, stakeMatic }) => {
+const StakeModal = ({ onClose, amount, setAmount, stake }) => {
     return (
         <>
             <div className='modal-class' onClick={onClose}>
                 <div className="modal-content" onClick={async (e) => { e.stopPropagation() }}>
                     <div className="modal-body">
-                        <h2 className='titleHeader'>Stake Matic</h2>
+                        <h2 className='titleHeader'>Stake Potato</h2>
 
                         <div className="row">
                             <div className="col-md-9 fieldContainer">
@@ -14,7 +14,7 @@ const StakeModal = ({ onClose, amount, setAmount, stakeMatic }) => {
                             </div>
 
                             <div className='col-md-3 inputFieldContainer'>
-                                <span>Matic</span>
+                                <span>Potato</span>
                             </div>
                         </div>
 
@@ -31,8 +31,8 @@ const StakeModal = ({ onClose, amount, setAmount, stakeMatic }) => {
                         </div> */}
 
                         <div className="row">
-                            <div onClick={() => stakeMatic(amount)} className="orangeButton">
-                                Stake Matic
+                            <div onClick={() => stake(amount)} className="orangeButton">
+                                Stake Potato
                             </div>
                         </div>
 

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/security/Pausable.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./Token.sol";
 
 // interface Token {
 //     function transferFrom(
@@ -20,17 +21,18 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contr
 //     {}
 // }
 
-interface Token {
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool);
+// commented just now
+// interface Token {
+//     function transferFrom(
+//         address from,
+//         address to,
+//         uint256 amount
+//     ) external returns (bool);
 
-    function balanceOf(address account) external view returns (uint256);
+//     function balanceOf(address account) external view returns (uint256);
 
-    function transfer(address to, uint256 amount) external returns (bool);
-}
+//     function transfer(address to, uint256 amount) external returns (bool);
+// }
 
 contract Staking is Pausable, ReentrancyGuard {
     Token token;
@@ -72,7 +74,11 @@ contract Staking is Pausable, ReentrancyGuard {
     uint256[] public lockPeriods;
 
     event Staked(address _staker, uint256 _amount);
-    event Withdraw(address _withdrawer, uint256 _amount, uint256 _interestEarned);
+    event Withdraw(
+        address _withdrawer,
+        uint256 _amount,
+        uint256 _interestEarned
+    );
 
     constructor(Token _address) {
         admin = msg.sender;
@@ -224,9 +230,13 @@ contract Staking is Pausable, ReentrancyGuard {
             stakers[_id].amountStaked -= commissionAmount;
             token.transfer(msg.sender, stakers[_id].amountStaked + interest);
             token.transfer(admin, commissionAmount);
-        }
 
-        emit Withdraw(msg.sender, stakers[_id].amountStaked + interest, interest);
+            emit Withdraw(
+                msg.sender,
+                stakers[_id].amountStaked + interest,
+                interest
+            );
+        }
 
         // payable(msg.sender).transfer(stakers[_id].amountStaked + interest);
     }
@@ -252,26 +262,23 @@ contract Staking is Pausable, ReentrancyGuard {
         // if ((level4 != msg.sender) && (level4 != address(0))) {
         //     refer_info[level4].level_4 += 1;
         // }
-
-        require(referral_info[ref_add] == false, "referral already paid");
-
-        if(level == 1) {
-            token.transferFrom(address(this), level.address, ((stakers[totalStakers].amountStaked * 7) / 100));
-        }
-        if(level == 2) {
-            token.transferFrom(address(this), level.address, ((stakers[totalStakers].amountStaked * 5) / 100));
-        }
-        if(level == 3) {
-            token.transferFrom(address(this), level.address, ((stakers[totalStakers].amountStaked * 4) / 100));
-        }
-        if(level == 4) {
-            token.transferFrom(address(this), level.address, ((stakers[totalStakers].amountStaked * 2) / 100));
-        }
-        if(level == 5) {
-            token.transferFrom(address(this), level.address, ((stakers[totalStakers].amountStaked * (5 / 10)) / 100));
-        }
-
-        referral_info[ref_add] = true;
+        // require(referral_info[ref_add] == false, "referral already paid");
+        // if(level == 1) {
+        //     token.transferFrom(address(this), level.address, ((stakers[totalStakers].amountStaked * 7) / 100));
+        // }
+        // if(level == 2) {
+        //     token.transferFrom(address(this), level.address, ((stakers[totalStakers].amountStaked * 5) / 100));
+        // }
+        // if(level == 3) {
+        //     token.transferFrom(address(this), level.address, ((stakers[totalStakers].amountStaked * 4) / 100));
+        // }
+        // if(level == 4) {
+        //     token.transferFrom(address(this), level.address, ((stakers[totalStakers].amountStaked * 2) / 100));
+        // }
+        // if(level == 5) {
+        //     token.transferFrom(address(this), level.address, ((stakers[totalStakers].amountStaked * (5 / 10)) / 100));
+        // }
+        // referral_info[ref_add] = true;
     }
 
     function pause() external onlyOwner {

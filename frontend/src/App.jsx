@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from "react";
-import artifact from "./artifacts/contracts/Staking.sol/Staking.json";
+import stakingArtifact from "./artifacts/contracts/Staking.sol/Staking.json";
+import tokenArtifact from "./artifacts/contracts/Token.sol/Token.json";
 import { ethers } from "ethers";
 import './App.css';
 import Navbar from "./components/Navbar";
 import StakeModal from "./components/StakeModal";
 import bnbLogo from "./images/binance-coin-logo.svg";
-import { Coin } from "react-bootstrap-icons";
 
 // const ContractAddress = '0x12163B070B97f06F5061D93164D960bbFCfdf965';
-const ContractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const StakingContractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
+const TokenContractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
-function App() {
+const App = () => {
 
   // frontend states
   const [provider, setProvider] = useState(undefined);
   const [account, setAccount] = useState(undefined);
-  const [contract, setContract] = useState(undefined);
+  const [tokenContract, setTokenContract] = useState(undefined);
+  const [stakingContract, setStakingContract] = useState(undefined);
   const [accountAddress, setAccountAddress] = useState(undefined);
 
   // assets
@@ -27,22 +29,29 @@ function App() {
   // const [stakingLength, setStakingLength] = useState(undefined);
   // const [stakingPercent, setStakingPercent] = useState('');
   const [amount, setAmount] = useState(0);
+  const [approve, setApprove] = useState(false);
   const [referralId, setReferralId] = useState('');
 
   // functions
   const toWei = ether => ethers.utils.parseEther(ether);
-  const toMatic = wei => ethers.utils.formatEther(wei);
+  const toPotato = wei => ethers.utils.formatEther(wei);
 
   useEffect(() => {
     const onload = async () => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(provider);
 
-      const contract = new ethers.Contract(
-        ContractAddress,
-        artifact.abi
+      const tokensContract = new ethers.Contract(
+        TokenContractAddress,
+        tokenArtifact.abi
       )
-      setContract(contract);
+      setTokenContract(tokensContract);
+
+      const stakeContract = new ethers.Contract(
+        StakingContractAddress,
+        stakingArtifact.abi
+      )
+      setStakingContract(stakeContract);
     }
 
     onload();
@@ -51,20 +60,20 @@ function App() {
   const isConnected = () => account !== undefined;
 
   const getAssetIds = async (address, account) => {
-    const assetIds = await contract.connect(account).getStakerIdsByAddresses(address);
+    const assetIds = await stakingContract.connect(account).getStakerIdsByAddresses(address);
 
     return assetIds;
   }
 
   const getAssets = async (ids, account) => {
     const loopedAssets = await Promise.all(
-      ids.map(id => contract.connect(account).getStakersById(id))
+      ids.map(id => stakingContract.connect(account).getStakersById(id))
     )
 
     loopedAssets.map(async asset => {
       const parsedAsset = {
         stakersId: asset.stakerId,
-        maticStaked: toMatic(asset.amountStaked),
+        amountStaked: toPotato(asset.amountStaked),
         open: asset.open
       }
 
@@ -92,20 +101,20 @@ function App() {
     getAssets(assetIds, account);
   }
 
-  const stakeMatic = (amount) => {
+  const stake = async (amount) => {
     const wei = toWei(amount);
-    const data = { value: wei };
 
-    contract.connect(account).stakeMatic(data)
+    await stakingContract.connect(account).stakePotato(wei);
   }
 
-  const stakingModal = (stakingLength) => {
+
+  const stakingModal = () => {
     setStakeModal(true);
   }
 
   const referral = (e) => {
     e.preventDefault();
-    contract.connect(account).referre(referralId);
+    stakingContract.connect(account).referre(referralId);
   }
 
   // const daysRemaining = (unlockDate) => {
@@ -116,7 +125,18 @@ function App() {
   // }
 
   const withdraw = (stakersId) => {
-    contract.connect(account).withdrawMatic(stakersId);
+    stakingContract.connect(account).withdrawPotato(stakersId);
+  }
+
+  const getApproval = async (amount) => {
+    const wei = toWei(amount);
+    const approve = await tokenContract.connect(account).approve(StakingContractAddress, wei);
+    if (approve) {
+      setApprove(true);
+    }
+    else {
+      setApprove(false);
+    }
   }
 
   return (
@@ -134,53 +154,33 @@ function App() {
             <span className="marketHeader">BNB Market</span>
           </div>
 
-          <div className="row">
-            <div className="col-md-4">
-              <div onClick={() => stakingModal(2, '3%')} className="marketOption">
-                <div className="glyphContainer hoverButton">
-                  <span className="glyph">
-                    <Coin />
-                  </span>
-                </div>
-
-                <div className="optionData">
-                  <span>2 Days</span>
-                  <span className="optionPercent">3%</span>
-                </div>
+          <div>
+            <div className="row">
+              <div className="fieldContainer">
+                <input type="number" className='inputField' placeholder="0" onChange={e => setAmount(e.target.value)} />
               </div>
             </div>
 
-            <div className="col-md-4">
-              <div onClick={() => stakingModal(4, '6%')} className="marketOption">
-                <div className="glyphContainer hoverButton">
-                  <span className="glyph">
-                    <Coin />
-                  </span>
-                </div>
-
-                <div className="optionData">
-                  <span>4 Days</span>
-                  <span className="optionPercent">6%</span>
-                </div>
-              </div>
+            <div className="row">
+              <button onClick={() => getApproval(amount)} className="orangeButton">
+                Approve Potatoes
+              </button>
             </div>
-
-            <div className="col-md-4">
-              <div onClick={() => stakingModal(7, '10%')} className="marketOption">
-                <div className="glyphContainer hoverButton">
-                  <span className="glyph">
-                    <Coin />
-                  </span>
-                </div>
-
-                <div className="optionData">
-                  <span>7 Days</span>
-                  <span className="optionPercent">10%</span>
-                </div>
-              </div>
-            </div>
-
           </div>
+
+          {approve === true ? (
+            <div onClick={() => stakingModal()} className="marketOption">
+              <button type="submit" className="orangeButton">
+                Stake Potatoes
+              </button>
+            </div>
+          )
+            :
+            (
+              <span style={{ color: "white", marginTop: '36px' }}>
+                First approve the tokens to be staked
+              </span>
+            )}
         </div>
       </div>
 
@@ -191,31 +191,29 @@ function App() {
 
         <div>
           <div className="row columnHeaders">
-            <div className="col-md-2">Assets</div>
-            <div className="col-md-2">Staked</div>
-            <div className="col-md-2"></div>
+            <div className="col-md-3">Assets</div>
+            <div className="col-md-3">Staked</div>
+            <div className="col-md-3">Interest earned</div>
+            <div className="col-md-3"></div>
           </div>
         </div>
         <br />
 
         {assets.length > 0 && assets.map((asset, index) => (
           <div className="row">
-            <div className="col-md-2">
+            <div className="col-md-3">
               <span>
-                <img src={bnbLogo} alt="matic-logo" className="stakedLogoImg" />
+                <img src={bnbLogo} alt="bnb-logo" className="stakedLogoImg" />
               </span>
             </div>
 
-            {/* <div className="col-md-2">
-              {asset.percentInterest} %
-            </div> */}
-            <div className="col-md-2">
-              {asset.maticStaked}
+            <div className="col-md-3">
+              {asset.amountStaked}
             </div>
-            {/* <div className="col-md-2">
-              {asset.maticInterest}
-            </div> */}
-            <div className="col-md-2">
+            <div className="col-md-3">
+              {asset.amountInterest}
+            </div>
+            <div className="col-md-3">
               {asset.open ? (
                 <div className="orangeMiniButton" onClick={() => withdraw(asset.stakersId)}>
                   Withdraw
@@ -243,7 +241,7 @@ function App() {
       </div>
 
       {stakeModal && (
-        <StakeModal onClose={() => setStakeModal(false)} amount={amount} setAmount={setAmount} stakeMatic={stakeMatic} />
+        <StakeModal onClose={() => setStakeModal(false)} amount={amount} setAmount={setAmount} stake={stake} />
       )}
 
     </div>
