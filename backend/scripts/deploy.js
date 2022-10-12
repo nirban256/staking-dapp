@@ -7,7 +7,7 @@ async function main() {
 
   const Staking = await ethers.getContractFactory('Staking');
 
-  const staking = await Staking.deploy('0x9767Ba8eCE4fAD70545a1C0544921070D9746271');
+  const staking = await Staking.deploy('0x9767ba8ece4fad70545a1c0544921070d9746271');
 
   await staking.deployed();
 

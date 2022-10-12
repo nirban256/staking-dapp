@@ -8,8 +8,8 @@ import StakeModal from "./components/StakeModal";
 import bnbLogo from "./images/binance-coin-logo.svg";
 
 // const ContractAddress = '0x12163B070B97f06F5061D93164D960bbFCfdf965';
-const StakingContractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
-const TokenContractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const StakingContractAddress = '0xf22428AE6EC0a4136D691A751D88Ecda7233CA47';
+const TokenContractAddress = '0x9767ba8ece4fad70545a1c0544921070d9746271';
 
 const App = () => {
 
@@ -163,7 +163,7 @@ const App = () => {
 
             <div className="row">
               <button onClick={() => getApproval(amount)} className="orangeButton">
-                Approve Potatoes
+                Approve Chakra
               </button>
             </div>
           </div>
@@ -171,7 +171,7 @@ const App = () => {
           {approve === true ? (
             <div onClick={() => stakingModal()} className="marketOption">
               <button type="submit" className="orangeButton">
-                Stake Potatoes
+                Stake Chakra
               </button>
             </div>
           )
@@ -232,7 +232,7 @@ const App = () => {
 
         <form className="referral_input">
           <input type="text" placeholder="Enter your referral id" onChange={e => setReferralId(e.target.value)} />
-          <button className="referralButton" onSubmit={referral}></button>
+          <button className="referralButton" onSubmit={referral}>Submit</button>
         </form>
 
         <h3 className="referral_heading">
