@@ -151,6 +151,7 @@ const App = () => {
             <span>
               <img src={bnbLogo} alt="matic logo" className="logoImg" />
             </span>
+
             <span className="marketHeader">BNB Market</span>
           </div>
 
