@@ -140,8 +140,12 @@ const App = () => {
   }
 
   return (
-    <div className="App">
-      <div>
+    <div>
+
+      <h1 className="text-5xl font-bold uppercase">Hello everyone</h1>
+
+
+      {/* <div>
         <Navbar isConnected={isConnected} connect={connectAndLoadWallet} />
       </div>
 
@@ -243,7 +247,7 @@ const App = () => {
 
       {stakeModal && (
         <StakeModal onClose={() => setStakeModal(false)} amount={amount} setAmount={setAmount} stake={stake} />
-      )}
+      )} */}
 
     </div>
   );
