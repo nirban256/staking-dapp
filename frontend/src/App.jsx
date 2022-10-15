@@ -142,14 +142,11 @@ const App = () => {
   return (
     <div>
 
-      <h1 className="text-5xl font-bold uppercase">Hello everyone</h1>
-
-
-      {/* <div>
+      <div>
         <Navbar isConnected={isConnected} connect={connectAndLoadWallet} />
       </div>
 
-      <div className="appBody">
+      {/* <div className="appBody">
         <div className="marketContainer">
           <div className="subContainer">
             <span>
