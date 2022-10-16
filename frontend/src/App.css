@@ -1,16 +1,16 @@
-.App {
-  background-color: #05062d;
-  text-align: center;
-  min-height: 100vh;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.appBody {
-  height: 100%;
-  margin-top: 80px;
+ul {
+  padding-left: 0rem !important;
 }
+
 
 /* Navbar */
-.navButton {
+/* .navButton {
   float: left;
   margin-left: 24px;
   padding: 5px;
@@ -38,11 +38,11 @@
   overflow: hidden;
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(17, 104, 241, 0.08);
-}
+}*/
 
 
 /* Market */
-.marketContainer {
+/*.marketContainer {
   backdrop-filter: blur(20px);
   background: linear-gradient(135deg, #101040, hsla(0, 0%, 100%, 0));
   border: 1px solid hsla(0, 0%, 100%, .18);
@@ -98,13 +98,12 @@
 }
 
 .hoverButton:active {
-  /* box-shadow: 0 0 0 white; */
   box-shadow: inset;
-}
+}*/
 
 
 /* Assets */
-.assetContainer {
+/*.assetContainer {
   backdrop-filter: blur(20px);
   background: linear-gradient(135deg, #101040, hsla(0, 0%, 100%, 0));
   border: 1px solid hsla(0, 0%, 100%, .18);
@@ -117,7 +116,6 @@
   padding: 6px;
   padding: 8px;
   margin-top: 50px;
-  /* space between sections */
   color: #fff;
   font-weight: 500;
 }
@@ -134,11 +132,11 @@
   margin-right: 14px;
   width: 18px;
   height: 18px;
-}
+}*/
 
 
 /* Glyphs */
-.glyphContainer {
+/*.glyphContainer {
   background-color: #fff;
   display: inline-block;
   width: 60px;
@@ -148,11 +146,11 @@
 
 .glyph {
   font-size: 34px;
-}
+}*/
 
 
 /* Stake Modal */
-.modal-class {
+/*.modal-class {
   background-color: rgba(0, 0, 0, 0.5);
   position: fixed;
   left: 0;
@@ -226,10 +224,10 @@
 
 .stakingTerms {
   color: blue;
-}
+}*/
 
 /* Referral container */
-.referral_container {
+/*.referral_container {
   backdrop-filter: blur(20px);
   background: linear-gradient(135deg, #101040, hsla(0, 0%, 100%, 0));
   border: 1px solid hsla(0, 0%, 100%, .18);
@@ -258,4 +256,4 @@
   color: #f1f1f3;
   font-size: 1rem;
   cursor: pointer;
-}
+}*/
