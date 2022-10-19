@@ -4,34 +4,34 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-// interface Token {
-//     function transferFrom(
-//         address _from,
-//         address _to,
-//         uint256 _value
-//     ) public whenNotPaused returns (bool) {}
-
-//     function balanceOf(address _owner) public view returns (uint256 balance) {}
-
-//     function transfer(address _to, uint256 _value)
-//         public
-//         whenNotPaused
-//         returns (bool)
-//     {}
-// }
-
-// client token interface
 interface Token {
     function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool);
+        address _from,
+        address _to,
+        uint256 _value
+    ) public whenNotPaused returns (bool) {}
 
-    function balanceOf(address account) external view returns (uint256);
+    function balanceOf(address _owner) public view returns (uint256 balance) {}
 
-    function transfer(address to, uint256 amount) external returns (bool);
+    function transfer(address _to, uint256 _value)
+        public
+        whenNotPaused
+        returns (bool)
+    {}
 }
+
+// client token interface
+// interface Token {
+//     function transferFrom(
+//         address from,
+//         address to,
+//         uint256 amount
+//     ) external returns (bool);
+
+//     function balanceOf(address account) external view returns (uint256);
+
+//     function transfer(address to, uint256 amount) external returns (bool);
+// }
 
 contract Staking is Pausable, ReentrancyGuard {
     Token token;
@@ -45,9 +45,10 @@ contract Staking is Pausable, ReentrancyGuard {
         uint256 amountStaked;
         bool open;
     }
-    Stakers staker;
+    // Stakers staker;
 
     uint256 private totalStakers = 0;
+    uint256 public totalStakedAmount;
 
     mapping(address => bool) internal referral_info;
 
@@ -75,6 +76,8 @@ contract Staking is Pausable, ReentrancyGuard {
         lockPeriods.push(2);
         lockPeriods.push(4);
         lockPeriods.push(7);
+
+        totalStakedAmount = 0;
     }
 
     modifier onlyOwner() {
@@ -104,16 +107,20 @@ contract Staking is Pausable, ReentrancyGuard {
             true
         );
 
-        referral(msg.sender);
-
         stakerIdsByAddress[msg.sender].push(totalStakers);
         totalStakers++;
+
+        totalStakedAmount += _amount;
 
         emit Staked(msg.sender, stakers[totalStakers - 1].amountStaked);
     }
 
     function getTotalVolume() public view returns (uint256) {
         return token.balanceOf(address(this));
+    }
+
+    function totalAmountStaked() public view returns (uint256) {
+        return totalStakedAmount;
     }
 
     function calculateInterest(uint256 _id, uint256 _amount)

@@ -6,9 +6,9 @@ import logo from "../images/logo3.png";
 const Navbar = ({ isConnected, connect }) => {
     return (
         <div>
-            <nav className='py-4 text-white sticky top-0 z-10'>
+            <nav className='pt-4 pb-1 text-white sticky top-0 z-10 bg-white'>
                 <ul className='flex justify-between align-middle flex-row px-3 md:px-8'>
-                    <li className='w-32 md:w-52'>
+                    <li className='w-40 md:w-52'>
                         <img src={logo} alt="Baked Bread" />
                     </li>
                     <li>

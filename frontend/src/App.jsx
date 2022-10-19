@@ -26,11 +26,10 @@ const App = () => {
 
   // staking
   const [stakeModal, setStakeModal] = useState(false);
-  // const [stakingLength, setStakingLength] = useState(undefined);
+  const [rewards, setRewards] = useState(0);
   // const [stakingPercent, setStakingPercent] = useState('');
   const [amount, setAmount] = useState(0);
   const [approve, setApprove] = useState(false);
-  const [referralId, setReferralId] = useState('');
 
   // functions
   const toWei = ether => ethers.utils.parseEther(ether);
@@ -54,8 +53,20 @@ const App = () => {
       setStakingContract(stakeContract);
     }
 
+    const getTotalStaked = async () => {
+      const staked = await stakingContract.connect(account).totalAmountStaked();
+      setAmount(toPotato(staked));
+    }
+
+    const remainingRewards = async () => {
+      const reward = await stakingContract.connect(account).getTotalVolume();
+      setRewards(reward);
+    }
+
     onload();
-  }, [])
+    getTotalStaked();
+    remainingRewards();
+  }, [account, stakingContract])
 
   const isConnected = () => account !== undefined;
 
@@ -77,7 +88,7 @@ const App = () => {
         open: asset.open
       }
 
-      setAssets(prev => [...prev, parsedAsset]);
+      setAssets(prev => prev.amountStaked + parsedAsset.amountStaked);
     })
   }
 
@@ -112,18 +123,6 @@ const App = () => {
     setStakeModal(true);
   }
 
-  const referral = (e) => {
-    e.preventDefault();
-    stakingContract.connect(account).referre(referralId);
-  }
-
-  // const daysRemaining = (unlockDate) => {
-  //   const currentTime = Date.now() / 1000;
-  //   const remainingTime = unlockDate - currentTime;
-
-  //   return Math.max((remainingTime / 60 / 60 / 24).toFixed(0), 0);
-  // }
-
   const withdraw = (stakersId) => {
     stakingContract.connect(account).withdrawPotato(stakersId);
   }
@@ -141,9 +140,52 @@ const App = () => {
 
   return (
     <div>
-
       <div>
         <Navbar isConnected={isConnected} connect={connectAndLoadWallet} />
+      </div>
+
+      <div className="pl-7 pt-5">
+        <h1 className=" text-3xl md:text-4xl text-gray-500">
+          STAKING
+        </h1>
+
+        <div className=" md:flex md:flex-row md:justify-center md:align-middle">
+          <div>
+            <span>Total Staked</span>
+            <h2>{amount > 0 ? amount : ''}</h2>
+          </div>
+
+          <div>
+            <span>Remaining rewards</span>
+            <h2>{rewards > 0 ? rewards : ''}</h2>
+          </div>
+        </div>
+
+        {approve === true ?
+          (
+            <div onClick={() => stakingModal()}>
+              <button type="submit" className="orangeButton">
+                Stake Chakra
+              </button>
+            </div>
+          )
+          :
+          (
+            <span>
+              Approve the tokens for staking
+            </span>
+          )
+        }
+
+        <div>
+          <button onClick={() => getApproval(amount)}>
+            Approve Chakra
+          </button>
+        </div>
+
+        {stakeModal && (
+          <StakeModal onClose={() => setStakeModal(false)} amount={amount} setAmount={setAmount} stake={stake} />
+        )}
       </div>
 
       {/* <div className="appBody">
