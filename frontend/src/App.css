@@ -8,6 +8,10 @@ ul {
   padding-left: 0rem !important;
 }
 
+body {
+  background-color: rgba(226, 232, 240, 0.637) !important;
+}
+
 
 /* Navbar */
 /* .navButton {
