@@ -4,21 +4,21 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-interface Token {
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _value
-    ) public whenNotPaused returns (bool) {}
+import "./Token.sol";
 
-    function balanceOf(address _owner) public view returns (uint256 balance) {}
+// interface Token {
+//     function transfer(address recipient, uint256 amount)
+//         external
+//         returns (bool);
 
-    function transfer(address _to, uint256 _value)
-        public
-        whenNotPaused
-        returns (bool)
-    {}
-}
+//     function balanceOf(address account) external view returns (uint256);
+
+//     function transferFrom(
+//         address sender,
+//         address recipient,
+//         uint256 amount
+//     ) external returns (uint256);
+// }
 
 // client token interface
 // interface Token {
@@ -115,11 +115,11 @@ contract Staking is Pausable, ReentrancyGuard {
         emit Staked(msg.sender, stakers[totalStakers - 1].amountStaked);
     }
 
-    function getTotalVolume() public view returns (uint256) {
+    function getTotalVolume() external view returns (uint256) {
         return token.balanceOf(address(this));
     }
 
-    function totalAmountStaked() public view returns (uint256) {
+    function totalAmountStaked() external view returns (uint256) {
         return totalStakedAmount;
     }
 

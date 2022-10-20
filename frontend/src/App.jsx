@@ -8,8 +8,8 @@ import StakeModal from "./components/StakeModal";
 import bnbLogo from "./images/binance-coin-logo.svg";
 
 // const ContractAddress = '0x12163B070B97f06F5061D93164D960bbFCfdf965';
-const StakingContractAddress = '0xf22428AE6EC0a4136D691A751D88Ecda7233CA47';
-const TokenContractAddress = '0x9767ba8ece4fad70545a1c0544921070d9746271';
+const StakingContractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
+const TokenContractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 const App = () => {
 
@@ -53,20 +53,20 @@ const App = () => {
       setStakingContract(stakeContract);
     }
 
-    const getTotalStaked = async () => {
-      const staked = await stakingContract.connect(account).totalAmountStaked();
-      setAmount(toPotato(staked));
-    }
+    // const getTotalStaked = async () => {
+    //   let staked = await stakingContract.totalAmountStaked();
+    //   setAmount(toPotato(staked));
+    // }
 
-    const remainingRewards = async () => {
-      const reward = await stakingContract.connect(account).getTotalVolume();
-      setRewards(reward);
-    }
+    // const remainingRewards = async () => {
+    //   let reward = await stakingContract.getTotalVolume();
+    //   setRewards(toPotato(reward));
+    // }
 
     onload();
-    getTotalStaked();
-    remainingRewards();
-  }, [account, stakingContract])
+    // getTotalStaked();
+    // remainingRewards();
+  }, [])
 
   const isConnected = () => account !== undefined;
 
@@ -144,48 +144,58 @@ const App = () => {
         <Navbar isConnected={isConnected} connect={connectAndLoadWallet} />
       </div>
 
-      <div className="pl-7 pt-5">
-        <h1 className=" text-3xl md:text-4xl text-gray-500">
-          STAKING
-        </h1>
+      <div className="flex-auto block">
+        <div className="max-w-6xl pt-8 md:pt-16 pb-60 px-3 md:px-8 mt-0 mb-0 ml-auto mr-auto relative">
+          <h1 className=" text-[#666] block text-2xl mb-8">
+            STAKING
+          </h1>
 
-        <div className=" md:flex md:flex-row md:justify-center md:align-middle">
-          <div>
-            <span>Total Staked</span>
-            <h2>{amount > 0 ? amount : ''}</h2>
-          </div>
-
-          <div>
-            <span>Remaining rewards</span>
-            <h2>{rewards > 0 ? rewards : ''}</h2>
-          </div>
-        </div>
-
-        {approve === true ?
-          (
-            <div onClick={() => stakingModal()}>
-              <button type="submit" className="orangeButton">
-                Stake Chakra
-              </button>
+          <div className=" grid gap-y-4 md:gap-y-8 md:grid-cols-2">
+            <div className=" bg-white border-b-[1px] border-solid border-[#e6e6e6] rounded-md block overflow-hidden px-6 py-4 w-full">
+              <span className="text-[#666] mb-4">Total Staked</span>
+              <h2>768,147</h2>
             </div>
-          )
-          :
-          (
-            <span>
-              Approve the tokens for staking
-            </span>
-          )
-        }
 
-        <div>
-          <button onClick={() => getApproval(amount)}>
-            Approve Chakra
-          </button>
+            <div>
+              <span className="text-[#666] mb-2">Remaining rewards</span>
+              <h2>132,017</h2>
+            </div>
+          </div>
+
+          {approve === true ?
+            (
+              <div onClick={() => stakingModal()}>
+                <button type="submit" className="orangeButton">
+                  Stake Chakra
+                </button>
+              </div>
+            )
+            :
+            (
+              <span>
+                Approve the tokens for staking
+              </span>
+            )
+          }
+
+          {approve === false ?
+            (
+              <div>
+                <button onClick={() => getApproval(amount)}>
+                  Approve Chakra
+                </button>
+              </div>
+            )
+            :
+            (
+              <p>''</p>
+            )
+          }
+
+          {stakeModal && (
+            <StakeModal onClose={() => setStakeModal(false)} amount={amount} setAmount={setAmount} stake={stake} />
+          )}
         </div>
-
-        {stakeModal && (
-          <StakeModal onClose={() => setStakeModal(false)} amount={amount} setAmount={setAmount} stake={stake} />
-        )}
       </div>
 
       {/* <div className="appBody">
