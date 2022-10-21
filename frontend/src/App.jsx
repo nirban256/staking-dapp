@@ -6,8 +6,8 @@ import './App.css';
 import Navbar from "./components/Navbar";
 import bnbLogo from "./images/binance-coin-logo.svg";
 
-const StakingContractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
-const TokenContractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const StakingContractAddress = '0x40567DDe024B83A967A76A8d1963Bf46713A2401';
+const TokenContractAddress = '0x9767ba8ece4fad70545a1c0544921070d9746271';
 
 const App = () => {
 
