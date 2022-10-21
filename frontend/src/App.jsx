@@ -6,7 +6,6 @@ import './App.css';
 import Navbar from "./components/Navbar";
 import bnbLogo from "./images/binance-coin-logo.svg";
 
-// const ContractAddress = '0x12163B070B97f06F5061D93164D960bbFCfdf965';
 const StakingContractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
 const TokenContractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
@@ -24,7 +23,6 @@ const App = () => {
   const [assets, setAssets] = useState([]);
 
   // staking
-  // const [stakeModal, setStakeModal] = useState(false);
   const [rewards, setRewards] = useState(0);
   const [stakedAmount, setStakedAmount] = useState(0);
   const [amount, setAmount] = useState(0);
@@ -52,19 +50,7 @@ const App = () => {
       setStakingContract(stakeContract);
     }
 
-    // const getTotalStaked = async () => {
-    //   let staked = await stakingContract.totalAmountStaked();
-    //   setAmount(toPotato(staked));
-    // }
-
-    // const remainingRewards = async () => {
-    //   let reward = await stakingContract.getTotalVolume();
-    //   setRewards(toPotato(reward));
-    // }
-
     onload();
-    // getTotalStaked();
-    // remainingRewards();
   }, [])
 
   const isConnected = () => account !== undefined;
@@ -124,10 +110,6 @@ const App = () => {
     //   setStakedAmount(data.amount);
     // })
   }
-
-  // const stakingModal = () => {
-  //   setStakeModal(true);
-  // }
 
   const withdraw = async (stakersId) => {
     await stakingContract.connect(account).withdrawPotato(stakersId);
@@ -214,11 +196,6 @@ const App = () => {
             <div className=" flex justify-center items-center flex-col md:col-start-2 md:col-end-4 row-start-1 row-end-3 px-6 py-4 bg-white border-b-[1px] border-solid border-[#e6e6e6] rounded-md">
               {approve === true ?
                 (
-                  // <div className="text-white" onClick={() => stakingModal()}>
-                  //   <button type="submit" className="bg-gradient-to-r from-[#4f6cff] to-[#bb29f7] hover:from-[#bb29f7] hover:to-[#4f6cff] px-4 py-2 font-semibold rounded-3xl text-sm md:text-xl md:px-2 border-none outline-none">
-                  //     Stake Chakra
-                  //   </button>
-                  // </div>
                   <span className=" text-2xl font-semibold mb-6">
                     Stake Chakra
                   </span>
@@ -265,106 +242,6 @@ const App = () => {
           </div>
         </div>
       </main>
-
-      {/* <div className="appBody">
-        <div className="marketContainer">
-          <div className="subContainer">
-            <span>
-              <img src={bnbLogo} alt="matic logo" className="logoImg" />
-            </span>
-
-            <span className="marketHeader">BNB Market</span>
-          </div>
-
-          <div>
-            <div className="row">
-              <div className="fieldContainer">
-                <input type="number" className='inputField' placeholder="0" onChange={e => setAmount(e.target.value)} />
-              </div>
-            </div>
-
-            <div className="row">
-              <button onClick={() => getApproval(amount)} className="orangeButton">
-                Approve Chakra
-              </button>
-            </div>
-          </div>
-
-          {approve === true ? (
-            <div onClick={() => stakingModal()} className="marketOption">
-              <button type="submit" className="orangeButton">
-                Stake Chakra
-              </button>
-            </div>
-          )
-            :
-            (
-              <span style={{ color: "white", marginTop: '36px' }}>
-                First approve the tokens to be staked
-              </span>
-            )}
-        </div>
-      </div>
-
-      <div className="assetContainer">
-        <div className="subContainer">
-          <span className="marketHeader">Staked Assets</span>
-        </div>
-
-        <div>
-          <div className="row columnHeaders">
-            <div className="col-md-3">Assets</div>
-            <div className="col-md-3">Staked</div>
-            <div className="col-md-3">Interest earned</div>
-            <div className="col-md-3"></div>
-          </div>
-        </div>
-        <br />
-
-        {assets.length > 0 && assets.map((asset, index) => (
-          <div className="row">
-            <div className="col-md-3">
-              <span>
-                <img src={bnbLogo} alt="bnb-logo" className="stakedLogoImg" />
-              </span>
-            </div>
-
-            <div className="col-md-3">
-              {asset.amountStaked}
-            </div>
-            <div className="col-md-3">
-              {asset.amountInterest}
-            </div>
-            <div className="col-md-3">
-              {asset.open ? (
-                <div className="orangeMiniButton" onClick={() => withdraw(asset.stakersId)}>
-                  Withdraw
-                </div>
-              ) : (
-                <span>Closed</span>
-              )}
-            </div>
-          </div>
-        ))}
-
-      </div>
-
-      <div className="referral_container">
-        <h2 className="referral_heading">Insert your referral link</h2>
-
-        <form className="referral_input">
-          <input type="text" placeholder="Enter your referral id" onChange={e => setReferralId(e.target.value)} />
-          <button className="referralButton" onSubmit={referral}>Submit</button>
-        </form>
-
-        <h3 className="referral_heading">
-          {(accountAddress) ? `Your referral id - ${accountAddress}` : ''}
-        </h3>
-      </div>
-
-      {stakeModal && (
-        <StakeModal onClose={() => setStakeModal(false)} amount={amount} setAmount={setAmount} stake={stake} />
-      )} */}
 
     </div>
   );
