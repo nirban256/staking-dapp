@@ -7,7 +7,7 @@ async function main() {
 
   const Staking = await ethers.getContractFactory('Staking');
 
-  const staking = await Staking.deploy('0x9767ba8ece4fad70545a1c0544921070d9746271');
+  const staking = await Staking.deploy('0x5FbDB2315678afecb367f032d93F642f64180aa3');
 
   await staking.deployed();
 
@@ -51,6 +51,8 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+// Client token contract address - 0x9767ba8ece4fad70545a1c0544921070d9746271
 
 
 // Contract Address = 0x12163B070B97f06F5061D93164D960bbFCfdf965

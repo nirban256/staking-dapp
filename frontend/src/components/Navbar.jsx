@@ -6,8 +6,8 @@ import logo from "../images/logo3.png";
 const Navbar = ({ isConnected, connect }) => {
     return (
         <div>
-            <nav className='pt-4 pb-1 text-white sticky top-0 z-10 bg-white'>
-                <ul className='flex justify-between align-middle flex-row px-3 md:px-8'>
+            <nav className='sticky top-0 pt-2 md:pt-4 pb-1 text-white bg-white mt-0 mb-0 ml-auto mr-auto block border-b-[1px] border-solid border-[#e6e6e6]'>
+                <ul className='flex flex-row justify-between items-center px-2 md:px-8 py-1 md:py-4 relative mt-0 mb-0 ml-auto mr-auto md:max-w-6xl'>
                     <li className='w-40 md:w-52'>
                         <img src={logo} alt="Baked Bread" />
                     </li>
