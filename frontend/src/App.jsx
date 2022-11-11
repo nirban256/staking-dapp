@@ -6,8 +6,8 @@ import './App.css';
 import Navbar from "./components/Navbar";
 import bnbLogo from "./images/binance-coin-logo.svg";
 
-const StakingContractAddress = '0x40567DDe024B83A967A76A8d1963Bf46713A2401';
-const TokenContractAddress = '0x9767ba8ece4fad70545a1c0544921070d9746271';
+const StakingContractAddress = '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0';
+const TokenContractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
 
 const App = () => {
 
@@ -23,6 +23,7 @@ const App = () => {
   const [assets, setAssets] = useState([]);
 
   // staking
+  // const [stakeModal, setStakeModal] = useState(false);
   const [rewards, setRewards] = useState(0);
   const [stakedAmount, setStakedAmount] = useState(0);
   const [amount, setAmount] = useState(0);
@@ -50,7 +51,19 @@ const App = () => {
       setStakingContract(stakeContract);
     }
 
+    // const getTotalStaked = async () => {
+    //   let staked = await stakingContract.totalAmountStaked();
+    //   setAmount(toPotato(staked));
+    // }
+
+    // const remainingRewards = async () => {
+    //   let reward = await stakingContract.getTotalVolume();
+    //   setRewards(toPotato(reward));
+    // }
+
     onload();
+    // getTotalStaked();
+    // remainingRewards();
   }, [])
 
   const isConnected = () => account !== undefined;
@@ -94,12 +107,14 @@ const App = () => {
     setAssetId(assetIds);
 
     getAssets(assetIds, account);
+
+    totalStaked();
   }
 
   const stake = async (amount) => {
     const wei = toWei(amount);
 
-    await stakingContract.connect(account).stakePotato(wei);
+    await stakingContract.connect(account).stakeChakra(wei);
 
     // stakingContract.on("Staked", (accountAddress, amount, event) => {
     //   let data = {
@@ -110,6 +125,10 @@ const App = () => {
     //   setStakedAmount(data.amount);
     // })
   }
+
+  // const stakingModal = () => {
+  //   setStakeModal(true);
+  // }
 
   const withdraw = async (stakersId) => {
     await stakingContract.connect(account).withdrawPotato(stakersId);
@@ -131,9 +150,7 @@ const App = () => {
     assets.forEach((asset) => (
       totalAsset += asset.amountStaked
     ))
-    return (
-      <p>{totalAsset}</p>
-    )
+    setStakedAmount(totalAsset);
   }
 
   return (
@@ -169,13 +186,13 @@ const App = () => {
               <span>Staked</span>
               <h3 className=" flex flex-row items-center">
                 {assets.length > 0 ? (
-                  <div>
-                    {totalStaked}
+                  <div className=" flex flex-row items-center">
+                    {stakedAmount}
                     <img src={bnbLogo} className=" w-5 h-5 ml-2" alt="" />
-                    <button type="submit" onClick={() => withdraw}>Withdraw</button>
+                    <button type="submit" onClick={withdraw}>Withdraw</button>
                   </div>
                 ) : (
-                  <div>
+                  <div className=" flex flex-row items-center">
                     <span>
                       0
                     </span>
@@ -196,6 +213,11 @@ const App = () => {
             <div className=" flex justify-center items-center flex-col md:col-start-2 md:col-end-4 row-start-1 row-end-3 px-6 py-4 bg-white border-b-[1px] border-solid border-[#e6e6e6] rounded-md">
               {approve === true ?
                 (
+                  // <div className="text-white" onClick={() => stakingModal()}>
+                  //   <button type="submit" className="bg-gradient-to-r from-[#4f6cff] to-[#bb29f7] hover:from-[#bb29f7] hover:to-[#4f6cff] px-4 py-2 font-semibold rounded-3xl text-sm md:text-xl md:px-2 border-none outline-none">
+                  //     Stake Chakra
+                  //   </button>
+                  // </div>
                   <span className=" text-2xl font-semibold mb-6">
                     Stake Chakra
                   </span>
@@ -242,9 +264,8 @@ const App = () => {
           </div>
         </div>
       </main>
-
     </div>
-  );
+  )
 }
 
 export default App;

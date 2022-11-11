@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from "../images/logo3.png";
+import logo from "../images/logo3.svg";
 
 // linear-gradient(90deg, #4f6cff 0%, #bb29f7 87.72%)
 
