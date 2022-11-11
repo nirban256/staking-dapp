@@ -4,20 +4,17 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-// client token interface
-// interface Token {
-//     function transferFrom(
-//         address from,
-//         address to,
-//         uint256 amount
-//     ) external returns (bool);
+interface Token {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool);
 
-//     function balanceOf(address account) external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
 
-//     function transfer(address to, uint256 amount) external returns (bool);
-// }
-
-import "./Token.sol";
+    function transfer(address to, uint256 amount) external returns (bool);
+}
 
 contract Staking is Pausable, ReentrancyGuard {
     Token token;
