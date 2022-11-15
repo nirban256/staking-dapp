@@ -6,21 +6,21 @@ import './App.css';
 import Navbar from "./components/Navbar";
 import bnbLogo from "./images/binance-coin-logo.svg";
 
-const StakingContractAddress = '0xbBD6998Ac87a394de02Af7a7dA978D2fcb4cB05f';
+const StakingContractAddress = '0x63F33884899E215723CA17095E654b931d645737';
 const TokenContractAddress = '0x9767ba8ece4fad70545a1c0544921070d9746271';
 
 const App = () => {
 
   // frontend states
   const [provider, setProvider] = useState(undefined);
-  const [account, setAccount] = useState(undefined);
+  const [account, setAccount] = useState();
   const [tokenContract, setTokenContract] = useState(undefined);
   const [stakingContract, setStakingContract] = useState(undefined);
   const [accountAddress, setAccountAddress] = useState(undefined);
 
   // assets
-  const [assetId, setAssetId] = useState([]);
-  const [assets, setAssets] = useState([]);
+  // const [assetId, setAssetId] = useState([]);
+  // const [assets, setAssets] = useState([]);
 
   // staking
   // const [stakeModal, setStakeModal] = useState(false);
@@ -31,63 +31,64 @@ const App = () => {
 
   // functions
   const toWei = ether => ethers.utils.parseEther(ether);
-  const toPotato = wei => ethers.utils.formatEther(wei);
+  const toChakra = wei => ethers.utils.formatEther(wei);
 
   useEffect(() => {
     const onload = async () => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(provider);
 
-      const tokensContract = new ethers.Contract(
+      const tokenContract = new ethers.Contract(
         TokenContractAddress,
         tokenArtifact.abi
       )
-      setTokenContract(tokensContract);
+      setTokenContract(tokenContract);
 
       const stakeContract = new ethers.Contract(
         StakingContractAddress,
         stakingArtifact.abi
       )
       setStakingContract(stakeContract);
+      totalStaked();
+      rewardsLeft();
     }
 
-    // const getTotalStaked = async () => {
-    //   let staked = await stakingContract.totalAmountStaked();
-    //   setAmount(toPotato(staked));
-    // }
-
-    // const remainingRewards = async () => {
-    //   let reward = await stakingContract.getTotalVolume();
-    //   setRewards(toPotato(reward));
-    // }
-
     onload();
-    // getTotalStaked();
-    // remainingRewards();
   }, [])
 
   const isConnected = () => account !== undefined;
 
-  const getAssetIds = async (address, account) => {
-    const assetIds = await stakingContract.connect(account).getStakerIdsByAddresses(address);
-
-    return assetIds;
-  }
-
-  const getAssets = async (ids, account) => {
-    const loopedAssets = await Promise.all(
-      ids.map(id => stakingContract.connect(account).getStakersById(id))
-    )
-
-    loopedAssets.map(async asset => {
-      const parsedAsset = {
-        stakersId: asset.stakerId,
-        amountStaked: toPotato(asset.amountStaked),
-        open: asset.open
+  const events = () => {
+    tokenContract.on("Approval", (owner, spender, value, data) => {
+      let event = {
+        owner,
+        spender,
+        value: toChakra(value),
+        data
       }
-      setAssets(prev => [...prev, parsedAsset]);
     })
   }
+
+  // const getAssetIds = async (address, account) => {
+  //   let assetIds = [];
+  //   assetIds = await stakingContract.connect(account).getStakerIdsByAddresses(address);
+  //   return assetIds;
+  // }
+
+  // const getAssets = async (ids, account) => {
+  //   const loopedAssets = await Promise.all(
+  //     ids.map(id => stakingContract.connect(account).getStakersById(id))
+  //   )
+
+  //   loopedAssets.map(async asset => {
+  //     const parsedAsset = {
+  //       stakersId: asset.stakerId,
+  //       amountStaked: toChakra(asset.amountStaked),
+  //       open: asset.open
+  //     }
+  //     setAssets(prev => [...prev, parsedAsset]);
+  //   })
+  // }
 
   const getAccount = async () => {
     await provider.send("eth_requestAccounts", [])
@@ -103,35 +104,21 @@ const App = () => {
     const accountAddress = await account.getAddress();
     setAccountAddress(accountAddress);
 
-    const assetIds = await getAssetIds(accountAddress, account);
-    setAssetId(assetIds);
+    // let assetIds = [];
+    // assetIds = await getAssetIds(accountAddress, account);
+    // setAssetId(assetIds);
 
-    getAssets(assetIds, account);
-
-    totalStaked();
+    // getAssets(assetId, account);
   }
 
   const stake = async (amount) => {
     const wei = toWei(amount);
 
     await stakingContract.connect(account).stakeChakra(wei);
-
-    // stakingContract.on("Staked", (accountAddress, amount, event) => {
-    //   let data = {
-    //     accountAddress: accountAddress,
-    //     amount: toPotato(amount),
-    //     info: event
-    //   }
-    //   setStakedAmount(data.amount);
-    // })
   }
 
-  // const stakingModal = () => {
-  //   setStakeModal(true);
-  // }
-
   const withdraw = async (stakersId) => {
-    await stakingContract.connect(account).withdrawPotato(stakersId);
+    await stakingContract.connect(account).withdrawChakra(stakersId);
   }
 
   const getApproval = async (amount) => {
@@ -145,12 +132,16 @@ const App = () => {
     }
   }
 
-  const totalStaked = () => {
+  const rewardsLeft = async () => {
+    let reward;
+    reward = await stakingContract.connect(account).getTotalVolume();
+    setRewards(toChakra(reward));
+  }
+
+  const totalStaked = async () => {
     let totalAsset;
-    assets.forEach((asset) => (
-      totalAsset += asset.amountStaked
-    ))
-    setStakedAmount(totalAsset);
+    totalAsset = await stakingContract.connect(account).amountEarned(accountAddress);
+    setStakedAmount(toChakra(totalAsset));
   }
 
   return (
@@ -185,11 +176,11 @@ const App = () => {
             <div className="bg-white border-b-[1px] border-solid border-[#e6e6e6] rounded-md block px-6 py-4 w-full">
               <span>Staked</span>
               <h3 className=" flex flex-row items-center">
-                {assets.length > 0 ? (
+                {stakedAmount > 0 ? (
                   <div className=" flex flex-row items-center">
                     {stakedAmount}
                     <img src={bnbLogo} className=" w-5 h-5 ml-2" alt="" />
-                    <button type="submit" onClick={withdraw}>Withdraw</button>
+                    <button className="bg-gradient-to-r from-[#4f6cff] to-[#bb29f7] hover:from-[#bb29f7] hover:to-[#4f6cff] px-4 py-2 font-semibold rounded-3xl text-sm md:text-xl md:px-2 border-none outline-none" type="submit" onClick={() => withdraw}>Withdraw</button>
                   </div>
                 ) : (
                   <div className=" flex flex-row items-center">
@@ -213,11 +204,6 @@ const App = () => {
             <div className=" flex justify-center items-center flex-col md:col-start-2 md:col-end-4 row-start-1 row-end-3 px-6 py-4 bg-white border-b-[1px] border-solid border-[#e6e6e6] rounded-md">
               {approve === true ?
                 (
-                  // <div className="text-white" onClick={() => stakingModal()}>
-                  //   <button type="submit" className="bg-gradient-to-r from-[#4f6cff] to-[#bb29f7] hover:from-[#bb29f7] hover:to-[#4f6cff] px-4 py-2 font-semibold rounded-3xl text-sm md:text-xl md:px-2 border-none outline-none">
-                  //     Stake Chakra
-                  //   </button>
-                  // </div>
                   <span className=" text-2xl font-semibold mb-6">
                     Stake Chakra
                   </span>

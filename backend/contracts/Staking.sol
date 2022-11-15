@@ -37,20 +37,20 @@ contract Staking is Pausable, ReentrancyGuard {
 
     uint256[] public lockPeriods;
 
-    event Staked(address _staker, uint256 _amount);
-    event Withdraw(address _withdrawer, uint256 _amount);
+    event Staked(address indexed _staker, uint256 indexed _amount);
+    event Withdraw(address indexed _withdrawer, uint256 indexed _amount);
 
     constructor(Token _address) {
         admin = msg.sender;
         token = _address;
 
-        levels[2] = 300; // 3%
-        levels[4] = 600; // 6%
-        levels[7] = 1000; // 10%
+        levels[120] = 300; // 3%
+        levels[240] = 600; // 6%
+        levels[420] = 1000; // 10%
 
-        lockPeriods.push(2);
-        lockPeriods.push(4);
-        lockPeriods.push(7);
+        lockPeriods.push(120);
+        lockPeriods.push(240);
+        lockPeriods.push(420);
 
         totalAmountStaked = 0;
         stakerId = 0;
@@ -60,7 +60,7 @@ contract Staking is Pausable, ReentrancyGuard {
         revert("No known transaction");
     }
 
-    function stakeChakra(uint256 _amount) external {
+    function stakeChakra(uint256 _amount) external whenNotPaused {
         require(msg.sender != address(0), "Address cannot be the zero address");
         require(_amount >= 1 ether, "Value must be greater than 0");
 
@@ -83,13 +83,11 @@ contract Staking is Pausable, ReentrancyGuard {
     function calculateInterest(uint256 _amount, uint256 _stakerId)
         private
         view
+        whenNotPaused
         returns (uint256)
     {
         uint256 totalTimeStaked = (block.timestamp -
-            stakers[_stakerId].dateCreated) /
-            60 /
-            60 /
-            24;
+            stakers[_stakerId].dateCreated); // / 60 / 24 -> for days
         uint256 interest = 0;
 
         for (uint256 i = 0; i <= lockPeriods.length - 1; i++) {
@@ -98,48 +96,23 @@ contract Staking is Pausable, ReentrancyGuard {
                 totalTimeStaked < lockPeriods[i + 1]
             ) {
                 interest = levels[lockPeriods[i]];
-            }
-
-            if (i + 1 > lockPeriods.length - 1) {
-                interest = levels[7];
+            } else if (totalTimeStaked >= lockPeriods[lockPeriods.length - 1]) {
+                interest = levels[420];
             }
         }
 
         return (interest * _amount) / 10000;
     }
 
-    function getInterestRate(uint256 _stakerId)
-        external
-        view
-        returns (uint256)
-    {
-        uint256 ans = 0;
-        uint256 totalTimeStaked = (block.timestamp -
-            stakers[_stakerId].dateCreated) /
-            60 minutes /
-            24 hours;
-        for (uint256 i = 0; i < lockPeriods.length - 1; i++) {
-            if (
-                i == lockPeriods.length - 1 && totalTimeStaked > lockPeriods[i]
-            ) {
-                ans = levels[i];
-            }
-            if (
-                totalTimeStaked >= lockPeriods[i] &&
-                totalTimeStaked < lockPeriods[i + 1]
-            ) {
-                ans = levels[i];
-            }
-        }
-        return ans;
-    }
-
     function updateStakePeriod(uint256 _numOfDays, uint256 _interest)
         external
         onlyOwner
+        whenNotPaused
     {
-        levels[_numOfDays] = _interest;
-        lockPeriods.push(_numOfDays);
+        uint256 timeInHours = _numOfDays * 24;
+        uint256 timeInSeconds = timeInHours * 60 * 60;
+        levels[timeInSeconds] = _interest * 100;
+        lockPeriods.push(timeInSeconds);
     }
 
     function getStakeperiods()
@@ -154,6 +127,7 @@ contract Staking is Pausable, ReentrancyGuard {
     function getStakerIdsByAddresses(address _address)
         internal
         view
+        whenNotPaused
         returns (uint256[] memory)
     {
         return stakerIdsByAddress[_address];
@@ -164,23 +138,22 @@ contract Staking is Pausable, ReentrancyGuard {
         view
         returns (uint256 amount)
     {
-        uint256[] memory stakersIds = getStakerIdsByAddresses(_staker);
-        for (uint256 i; i < stakersIds.length; ) {
-            amount =
-                amount +
-                (stakers[stakersIds[i]].amountStaked +
-                    calculateInterest(
-                        stakers[stakersIds[i]].amountStaked,
-                        stakersIds[i]
-                    ));
-            unchecked {
-                ++i;
+        unchecked {
+            uint256[] memory stakersIds = getStakerIdsByAddresses(_staker);
+            for (uint256 i; i < stakersIds.length; i++) {
+                amount =
+                    amount +
+                    (stakers[stakersIds[i]].amountStaked +
+                        calculateInterest(
+                            stakers[stakersIds[i]].amountStaked,
+                            stakersIds[i]
+                        ));
             }
         }
         return amount;
     }
 
-    function withdrawPotato() external nonReentrant {
+    function withdrawChakra() external nonReentrant whenNotPaused {
         address staker = msg.sender;
         uint256 amount;
         uint256 comission = 0;
@@ -207,8 +180,6 @@ contract Staking is Pausable, ReentrancyGuard {
         }
 
         emit Withdraw(staker, amount);
-
-        // payable(msg.sender).transfer(stakers[_id].amountStaked + interest);
     }
 
     function getTotalVolume() external view returns (uint256) {

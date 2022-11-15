@@ -1,9 +1,6 @@
 const { ethers } = require("hardhat");
-require("dotenv").config();
 
 async function main() {
-
-  // [signer1, signer2] = await ethers.getSigners();
 
   const Staking = await ethers.getContractFactory('Staking');
 
@@ -24,4 +21,4 @@ main().catch((error) => {
 
 // Client token contract address - 0x9767ba8ece4fad70545a1c0544921070d9746271
 
-// Staking Testnet Address = 0xbBD6998Ac87a394de02Af7a7dA978D2fcb4cB05f
+// Staking Testnet Address = 0x63F33884899E215723CA17095E654b931d645737
