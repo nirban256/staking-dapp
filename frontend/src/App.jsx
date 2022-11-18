@@ -6,7 +6,7 @@ import './App.css';
 import Navbar from "./components/Navbar";
 import bnbLogo from "./images/binance-coin-logo.svg";
 
-const StakingContractAddress = '0x63F33884899E215723CA17095E654b931d645737';
+const StakingContractAddress = '0x5173238D8E893d7baa0956320E7bfdd142A222b4';
 const TokenContractAddress = '0x9767ba8ece4fad70545a1c0544921070d9746271';
 
 const App = () => {
@@ -18,12 +18,6 @@ const App = () => {
   const [stakingContract, setStakingContract] = useState(undefined);
   const [accountAddress, setAccountAddress] = useState(undefined);
 
-  // assets
-  // const [assetId, setAssetId] = useState([]);
-  // const [assets, setAssets] = useState([]);
-
-  // staking
-  // const [stakeModal, setStakeModal] = useState(false);
   const [rewards, setRewards] = useState(0);
   const [stakedAmount, setStakedAmount] = useState(0);
   const [amount, setAmount] = useState(0);
@@ -40,13 +34,15 @@ const App = () => {
 
       const tokenContract = new ethers.Contract(
         TokenContractAddress,
-        tokenArtifact.abi
+        tokenArtifact,
+        provider
       )
       setTokenContract(tokenContract);
 
       const stakeContract = new ethers.Contract(
         StakingContractAddress,
-        stakingArtifact.abi
+        stakingArtifact.abi,
+        provider
       )
       setStakingContract(stakeContract);
       totalStaked();
@@ -57,38 +53,6 @@ const App = () => {
   }, [])
 
   const isConnected = () => account !== undefined;
-
-  const events = () => {
-    tokenContract.on("Approval", (owner, spender, value, data) => {
-      let event = {
-        owner,
-        spender,
-        value: toChakra(value),
-        data
-      }
-    })
-  }
-
-  // const getAssetIds = async (address, account) => {
-  //   let assetIds = [];
-  //   assetIds = await stakingContract.connect(account).getStakerIdsByAddresses(address);
-  //   return assetIds;
-  // }
-
-  // const getAssets = async (ids, account) => {
-  //   const loopedAssets = await Promise.all(
-  //     ids.map(id => stakingContract.connect(account).getStakersById(id))
-  //   )
-
-  //   loopedAssets.map(async asset => {
-  //     const parsedAsset = {
-  //       stakersId: asset.stakerId,
-  //       amountStaked: toChakra(asset.amountStaked),
-  //       open: asset.open
-  //     }
-  //     setAssets(prev => [...prev, parsedAsset]);
-  //   })
-  // }
 
   const getAccount = async () => {
     await provider.send("eth_requestAccounts", [])
@@ -103,22 +67,16 @@ const App = () => {
 
     const accountAddress = await account.getAddress();
     setAccountAddress(accountAddress);
-
-    // let assetIds = [];
-    // assetIds = await getAssetIds(accountAddress, account);
-    // setAssetId(assetIds);
-
-    // getAssets(assetId, account);
   }
 
   const stake = async (amount) => {
     const wei = toWei(amount);
-
     await stakingContract.connect(account).stakeChakra(wei);
   }
 
-  const withdraw = async (stakersId) => {
-    await stakingContract.connect(account).withdrawChakra(stakersId);
+  const withdraw = async () => {
+    const contract = new ethers.Contract(StakingContractAddress, stakingArtifact.abi, account);
+    await contract.connect(account).withdrawChakra();
   }
 
   const getApproval = async (amount) => {
@@ -134,8 +92,8 @@ const App = () => {
 
   const rewardsLeft = async () => {
     let reward;
-    reward = await stakingContract.connect(account).getTotalVolume();
-    setRewards(toChakra(reward));
+    reward = toChakra(await stakingContract.connect(account).getTotalVolume());
+    setRewards(reward);
   }
 
   const totalStaked = async () => {
@@ -174,22 +132,9 @@ const App = () => {
 
           <div className=" grid gap-4 md:gap-8 md:grid-cols-3 grid-rows-3 md:grid-rows-2 mt-4 md:mt-8">
             <div className="bg-white border-b-[1px] border-solid border-[#e6e6e6] rounded-md block px-6 py-4 w-full">
-              <span>Staked</span>
+              <span className="pb-6">Withdraw Tokens</span>
               <h3 className=" flex flex-row items-center">
-                {stakedAmount > 0 ? (
-                  <div className=" flex flex-row items-center">
-                    {stakedAmount}
-                    <img src={bnbLogo} className=" w-5 h-5 ml-2" alt="" />
-                    <button className="bg-gradient-to-r from-[#4f6cff] to-[#bb29f7] hover:from-[#bb29f7] hover:to-[#4f6cff] px-4 py-2 font-semibold rounded-3xl text-sm md:text-xl md:px-2 border-none outline-none" type="submit" onClick={() => withdraw}>Withdraw</button>
-                  </div>
-                ) : (
-                  <div className=" flex flex-row items-center">
-                    <span>
-                      0
-                    </span>
-                    <img src={bnbLogo} className=" w-5 h-5 ml-2" alt="" />
-                  </div>
-                )}
+                <button className="bg-gradient-to-r from-[#4f6cff] to-[#bb29f7] hover:from-[#bb29f7] hover:to-[#4f6cff] px-4 py-2 font-semibold rounded-3xl text-sm md:text-xl md:px-2 border-none outline-none text-white" type="submit" onClick={withdraw}>Withdraw</button>
               </h3>
             </div>
 

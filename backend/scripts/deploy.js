@@ -21,4 +21,4 @@ main().catch((error) => {
 
 // Client token contract address - 0x9767ba8ece4fad70545a1c0544921070d9746271
 
-// Staking Testnet Address = 0x63F33884899E215723CA17095E654b931d645737
+// Staking Testnet Address = 0x1119218EcF1603B46f07ACdD965cB611829E7AdB

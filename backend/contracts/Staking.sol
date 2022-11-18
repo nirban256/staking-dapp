@@ -20,22 +20,21 @@ contract Staking is Pausable, ReentrancyGuard {
     Token token;
 
     address public admin;
-    uint256 totalAmountStaked;
-    uint256 stakerId;
+    uint256 private totalAmountStaked;
+    uint256 private depositorId;
 
     struct Stakers {
         address staker;
-        uint256 stakerId;
         uint256 dateCreated;
         uint256 amountStaked;
         bool claimed;
     }
 
-    mapping(uint256 => Stakers) public stakers;
-    mapping(address => uint256[]) public stakerIdsByAddress;
-    mapping(uint256 => uint256) public levels;
+    mapping(uint256 => Stakers) internal stakers;
+    mapping(address => uint256[]) internal stakerIdsByAddress;
+    mapping(uint256 => uint256) internal levels;
 
-    uint256[] public lockPeriods;
+    uint256[] internal lockPeriods;
 
     event Staked(address indexed _staker, uint256 indexed _amount);
     event Withdraw(address indexed _withdrawer, uint256 indexed _amount);
@@ -53,7 +52,7 @@ contract Staking is Pausable, ReentrancyGuard {
         lockPeriods.push(420);
 
         totalAmountStaked = 0;
-        stakerId = 0;
+        depositorId = 0;
     }
 
     receive() external payable {
@@ -65,19 +64,18 @@ contract Staking is Pausable, ReentrancyGuard {
         require(_amount >= 1 ether, "Value must be greater than 0");
 
         token.transferFrom(msg.sender, address(this), _amount);
-        stakerId += 1;
-        stakers[stakerId] = Stakers(
+        depositorId += 1;
+        stakers[depositorId] = Stakers(
             msg.sender,
-            stakerId,
             block.timestamp,
             _amount,
             false
         );
 
-        stakerIdsByAddress[msg.sender].push(stakerId);
+        stakerIdsByAddress[msg.sender].push(depositorId);
         totalAmountStaked += _amount;
 
-        emit Staked(msg.sender, stakers[stakerId].amountStaked);
+        emit Staked(msg.sender, stakers[depositorId].amountStaked);
     }
 
     function calculateInterest(uint256 _amount, uint256 _stakerId)
@@ -124,23 +122,33 @@ contract Staking is Pausable, ReentrancyGuard {
         return lockPeriods;
     }
 
-    function getStakerIdsByAddresses(address _address)
-        internal
-        view
-        whenNotPaused
-        returns (uint256[] memory)
-    {
-        return stakerIdsByAddress[_address];
-    }
-
     function amountEarned(address _staker)
         external
         view
         returns (uint256 amount)
     {
-        unchecked {
-            uint256[] memory stakersIds = getStakerIdsByAddresses(_staker);
-            for (uint256 i; i < stakersIds.length; i++) {
+        uint256[] memory stakersIds = stakerIdsByAddress[_staker];
+        for (uint256 i = 0; i < stakersIds.length; i++) {
+            amount =
+                amount +
+                (stakers[stakersIds[i]].amountStaked +
+                    calculateInterest(
+                        stakers[stakersIds[i]].amountStaked,
+                        stakersIds[i]
+                    ));
+        }
+        return amount;
+    }
+
+    function withdrawChakra() external nonReentrant whenNotPaused {
+        address _staker = msg.sender;
+        uint256 amount = 0;
+        uint256 comissionAdmin = 0;
+
+        uint256[] memory stakersIds = stakerIdsByAddress[_staker];
+
+        for (uint256 i = 0; i < stakersIds.length; i++) {
+            if (stakers[stakersIds[i]].claimed == false) {
                 amount =
                     amount +
                     (stakers[stakersIds[i]].amountStaked +
@@ -148,38 +156,16 @@ contract Staking is Pausable, ReentrancyGuard {
                             stakers[stakersIds[i]].amountStaked,
                             stakersIds[i]
                         ));
+                amount = amount - 100 wei;
+                comissionAdmin += 100 wei;
+                stakers[stakersIds[i]].claimed = true;
             }
         }
-        return amount;
-    }
 
-    function withdrawChakra() external nonReentrant whenNotPaused {
-        address staker = msg.sender;
-        uint256 amount;
-        uint256 comission = 0;
+        token.transfer(msg.sender, amount);
+        token.transfer(admin, comissionAdmin);
 
-        unchecked {
-            uint256[] memory stakersIds = getStakerIdsByAddresses(staker);
-
-            for (uint256 i; i < stakersIds.length; ++i) {
-                if (stakers[stakersIds[i]].claimed == false) {
-                    amount =
-                        amount +
-                        (stakers[stakersIds[i]].amountStaked +
-                            calculateInterest(
-                                stakers[stakersIds[i]].amountStaked,
-                                stakersIds[i]
-                            ));
-                    amount = amount - 100 wei;
-                    comission += 100 wei;
-                    stakers[stakersIds[i]].claimed = true;
-                }
-            }
-            token.transfer(msg.sender, amount);
-            token.transfer(admin, comission);
-        }
-
-        emit Withdraw(staker, amount);
+        emit Withdraw(_staker, amount);
     }
 
     function getTotalVolume() external view returns (uint256) {
