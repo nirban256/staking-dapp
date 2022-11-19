@@ -2,13 +2,13 @@ const { ethers } = require("hardhat");
 
 async function main() {
 
-  const Staking = await ethers.getContractFactory('Staking');
+  const Staking = await ethers.getContractFactory('ChakraStaking');
 
   const staking = await Staking.deploy('0x9767ba8ece4fad70545a1c0544921070d9746271');
 
   await staking.deployed();
 
-  console.log(`Staking contract deployed to ${staking.address}`);
+  console.log(`ChakraStaking contract deployed to ${staking.address}`);
 
 }
 

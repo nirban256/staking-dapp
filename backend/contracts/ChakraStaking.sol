@@ -16,12 +16,12 @@ interface Token {
     function transfer(address to, uint256 amount) external returns (bool);
 }
 
-contract Staking is Pausable, ReentrancyGuard {
+contract ChakraStaking is Pausable, ReentrancyGuard {
     Token token;
 
     address public admin;
     uint256 private totalAmountStaked;
-    uint256 private depositorId;
+    uint256 public depositorId;
 
     struct Stakers {
         address staker;
@@ -30,7 +30,7 @@ contract Staking is Pausable, ReentrancyGuard {
         bool claimed;
     }
 
-    mapping(uint256 => Stakers) internal stakers;
+    mapping(uint256 => Stakers) public stakers;
     mapping(address => uint256[]) internal stakerIdsByAddress;
     mapping(uint256 => uint256) internal levels;
 
@@ -89,13 +89,13 @@ contract Staking is Pausable, ReentrancyGuard {
         uint256 interest = 0;
 
         for (uint256 i = 0; i <= lockPeriods.length - 1; i++) {
-            if (
+            if (totalTimeStaked >= lockPeriods[lockPeriods.length - 1]) {
+                interest = levels[420];
+            } else if (
                 totalTimeStaked >= lockPeriods[i] &&
                 totalTimeStaked < lockPeriods[i + 1]
             ) {
                 interest = levels[lockPeriods[i]];
-            } else if (totalTimeStaked >= lockPeriods[lockPeriods.length - 1]) {
-                interest = levels[420];
             }
         }
 

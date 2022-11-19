@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import stakingArtifact from "./artifacts/contracts/Staking.sol/Staking.json";
-import tokenArtifact from "./artifacts/contracts/Staking.sol/Token.json";
+import stakingArtifact from "./artifacts/contracts/ChakraStaking.sol/ChakraStaking.json";
+import tokenArtifact from "./artifacts/contracts/ChakraStaking.sol/Token.json";
 import { ethers } from "ethers";
 import './App.css';
 import Navbar from "./components/Navbar";
 import bnbLogo from "./images/binance-coin-logo.svg";
 
-const StakingContractAddress = '0x5173238D8E893d7baa0956320E7bfdd142A222b4';
+const StakingContractAddress = '0xcE8c414Bc9B64121C1a6C9c0F9342Fe05A068c7C';
 const TokenContractAddress = '0x9767ba8ece4fad70545a1c0544921070d9746271';
 
 const App = () => {
