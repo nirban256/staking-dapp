@@ -149,13 +149,11 @@ contract ChakraStaking is Pausable, ReentrancyGuard {
 
         for (uint256 i = 0; i < stakersIds.length; i++) {
             if (stakers[stakersIds[i]].claimed == false) {
-                amount =
-                    amount +
-                    (stakers[stakersIds[i]].amountStaked +
-                        calculateInterest(
-                            stakers[stakersIds[i]].amountStaked,
-                            stakersIds[i]
-                        ));
+                uint256 interest = calculateInterest(
+                    stakers[stakersIds[i]].amountStaked,
+                    stakersIds[i]
+                );
+                amount += (stakers[stakersIds[i]].amountStaked + interest);
                 amount = amount - 100 wei;
                 comissionAdmin += 100 wei;
                 stakers[stakersIds[i]].claimed = true;
@@ -180,7 +178,6 @@ contract ChakraStaking is Pausable, ReentrancyGuard {
         _pause();
     }
 
-    // function to unpause the contract after any issue which occurs gets resolved
     function unpause() external onlyOwner {
         _unpause();
     }

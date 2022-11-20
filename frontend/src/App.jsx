@@ -6,7 +6,7 @@ import './App.css';
 import Navbar from "./components/Navbar";
 import bnbLogo from "./images/binance-coin-logo.svg";
 
-const StakingContractAddress = '0xcE8c414Bc9B64121C1a6C9c0F9342Fe05A068c7C';
+const StakingContractAddress = '0x1a7f2eafE725CC2163E722EE2DE2E15827077206';
 const TokenContractAddress = '0x9767ba8ece4fad70545a1c0544921070d9746271';
 
 const App = () => {
@@ -19,7 +19,6 @@ const App = () => {
   const [accountAddress, setAccountAddress] = useState(undefined);
 
   const [rewards, setRewards] = useState(0);
-  const [stakedAmount, setStakedAmount] = useState(0);
   const [amount, setAmount] = useState(0);
   const [approve, setApprove] = useState(false);
 
@@ -45,8 +44,6 @@ const App = () => {
         provider
       )
       setStakingContract(stakeContract);
-      totalStaked();
-      rewardsLeft();
     }
 
     onload();
@@ -90,16 +87,10 @@ const App = () => {
     }
   }
 
-  const rewardsLeft = async () => {
+  const totalStaked = async (account) => {
     let reward;
-    reward = toChakra(await stakingContract.connect(account).getTotalVolume());
-    setRewards(reward);
-  }
-
-  const totalStaked = async () => {
-    let totalAsset;
-    totalAsset = await stakingContract.connect(account).amountEarned(accountAddress);
-    setStakedAmount(toChakra(totalAsset));
+    reward = await stakingContract.connect(account).amountEarned(accountAddress);
+    setRewards(toChakra(reward));
   }
 
   return (
