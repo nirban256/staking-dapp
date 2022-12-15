@@ -78,12 +78,10 @@ contract ChakraStaking is Pausable, ReentrancyGuard {
         emit Staked(msg.sender, stakers[depositorId].amountStaked);
     }
 
-    function calculateInterest(uint256 _amount, uint256 _stakerId)
-        private
-        view
-        whenNotPaused
-        returns (uint256)
-    {
+    function calculateInterest(
+        uint256 _amount,
+        uint256 _stakerId
+    ) private view whenNotPaused returns (uint256) {
         uint256 totalTimeStaked = (block.timestamp -
             stakers[_stakerId].dateCreated); // / 60 / 24 -> for days
         uint256 interest = 0;
@@ -102,11 +100,10 @@ contract ChakraStaking is Pausable, ReentrancyGuard {
         return (interest * _amount) / 10000;
     }
 
-    function updateStakePeriod(uint256 _numOfDays, uint256 _interest)
-        external
-        onlyOwner
-        whenNotPaused
-    {
+    function updateStakePeriod(
+        uint256 _numOfDays,
+        uint256 _interest
+    ) external onlyOwner whenNotPaused {
         uint256 timeInHours = _numOfDays * 24;
         uint256 timeInSeconds = timeInHours * 60 * 60;
         levels[timeInSeconds] = _interest * 100;
@@ -122,20 +119,10 @@ contract ChakraStaking is Pausable, ReentrancyGuard {
         return lockPeriods;
     }
 
-    function amountEarned(address _staker)
-        external
-        view
-        returns (uint256 amount)
-    {
+    function staked(address _staker) external view returns (uint256 amount) {
         uint256[] memory stakersIds = stakerIdsByAddress[_staker];
         for (uint256 i = 0; i < stakersIds.length; i++) {
-            amount =
-                amount +
-                (stakers[stakersIds[i]].amountStaked +
-                    calculateInterest(
-                        stakers[stakersIds[i]].amountStaked,
-                        stakersIds[i]
-                    ));
+            amount = amount + (stakers[stakersIds[i]].amountStaked);
         }
         return amount;
     }

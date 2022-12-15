@@ -21,4 +21,6 @@ main().catch((error) => {
 
 // Client token contract address - 0x9767ba8ece4fad70545a1c0544921070d9746271
 
-// Staking Testnet Address = 0x1a7f2eafE725CC2163E722EE2DE2E15827077206
+// Staking Testnet Address = 0x972747df061D6adAc8b73C4889A53109688BF892
+
+// In the staked function in ChakraStaking.sol the function should only count the amount staked if open is true.

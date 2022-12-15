@@ -6,7 +6,7 @@ import './App.css';
 import Navbar from "./components/Navbar";
 import bnbLogo from "./images/binance-coin-logo.svg";
 
-const StakingContractAddress = '0x1a7f2eafE725CC2163E722EE2DE2E15827077206';
+const StakingContractAddress = '0x972747df061D6adAc8b73C4889A53109688BF892';
 const TokenContractAddress = '0x9767ba8ece4fad70545a1c0544921070d9746271';
 
 const App = () => {
@@ -18,7 +18,7 @@ const App = () => {
   const [stakingContract, setStakingContract] = useState(undefined);
   const [accountAddress, setAccountAddress] = useState(undefined);
 
-  const [rewards, setRewards] = useState(0);
+  const [staked, setStaked] = useState(0);
   const [amount, setAmount] = useState(0);
   const [approve, setApprove] = useState(false);
 
@@ -87,10 +87,10 @@ const App = () => {
     }
   }
 
-  const totalStaked = async (account) => {
-    let reward;
-    reward = await stakingContract.connect(account).amountEarned(accountAddress);
-    setRewards(toChakra(reward));
+  const totalStaked = async () => {
+    let amountStaked;
+    amountStaked = await stakingContract.connect(account).staked(accountAddress);
+    setStaked(toChakra(amountStaked));
   }
 
   return (
@@ -123,17 +123,20 @@ const App = () => {
 
           <div className=" grid gap-4 md:gap-8 md:grid-cols-3 grid-rows-3 md:grid-rows-2 mt-4 md:mt-8">
             <div className="bg-white border-b-[1px] border-solid border-[#e6e6e6] rounded-md block px-6 py-4 w-full">
-              <span className="pb-6">Withdraw Tokens</span>
-              <h3 className=" flex flex-row items-center">
-                <button className="bg-gradient-to-r from-[#4f6cff] to-[#bb29f7] hover:from-[#bb29f7] hover:to-[#4f6cff] px-4 py-2 font-semibold rounded-3xl text-sm md:text-xl md:px-2 border-none outline-none text-white" type="submit" onClick={withdraw}>Withdraw</button>
+              <span>Staked</span>
+              <h3 className="flex flex-row items-center mt-1">
+                {staked > 0 ? staked : 0}
+                <img src={bnbLogo} className=" w-5 h-5 ml-2" alt="" />
               </h3>
+              <button className="bg-gradient-to-r from-[#4f6cff] to-[#bb29f7] hover:from-[#bb29f7] hover:to-[#4f6cff] px-4 py-2 font-semibold rounded-3xl text-sm md:text-xl md:px-2 border-none outline-none text-white" onClick={totalStaked}>
+                Staked
+              </button>
             </div>
 
             <div className="bg-white border-b-[1px] border-solid border-[#e6e6e6] rounded-md block overflow-hidden px-6 py-4 w-full">
-              <span>Reward</span>
-              <h3 className=" flex flex-row items-center">
-                {rewards > 0 ? rewards : 0}
-                <img src={bnbLogo} className=" w-5 h-5 ml-2" alt="" />
+              <span className="pb-6">Claim Tokens</span>
+              <h3 className=" flex flex-row items-center mt-2">
+                <button className="bg-gradient-to-r from-[#4f6cff] to-[#bb29f7] hover:from-[#bb29f7] hover:to-[#4f6cff] px-4 py-2 font-semibold rounded-3xl text-sm md:text-xl md:px-2 border-none outline-none text-white" type="submit" onClick={withdraw}>Claim</button>
               </h3>
             </div>
 
@@ -175,7 +178,7 @@ const App = () => {
                         </div>
 
                         <button type="submit" className=" text-white bg-gradient-to-r from-[#4f6cff] to-[#bb29f7] hover:from-[#bb29f7] hover:to-[#4f6cff] px-4 py-2 font-semibold rounded-3xl text-sm md:text-xl md:px-2 border-none outline-none mt-1 md:mt-3" onClick={() => stake(amount)}>
-                          Stake Potato
+                          Stake Chakra
                         </button>
                       </div>
                     </div>
